@@ -1,4 +1,10 @@
-﻿using System;
+﻿//==========================================================
+// Student Number	: S10268407E
+// Student Name	: Serene Ker Xin Yun
+// Partner Name	: Shawntrice Yip Yin Fei
+//==========================================================
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -47,7 +53,7 @@ namespace S10268407E_PRG2Assignment
         }
         public Airline GetAirlineFromFlight(Flight flight)
         {
-            foreach (var airline in Airline.Values)
+            foreach (var airline in Airlines.Values)
             {
                 if (airline.Flights.ContainsValue(flight))
                 {

@@ -1,4 +1,10 @@
-﻿using System;
+﻿//==========================================================
+// Student Number	: S10268407E
+// Student Name	: Serene Ker Xin Yun
+// Partner Name	: Shawntrice Yip Yin Fei
+//==========================================================
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
