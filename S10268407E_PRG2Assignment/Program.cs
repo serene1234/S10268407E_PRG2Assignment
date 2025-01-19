@@ -59,3 +59,77 @@ void DisplayAllBoardingGates(Dictionary<string, BoardingGate> bGateDict)
         Console.WriteLine($"{bGate.GateName,-16}{bGate.SupportsDDJB,-23}{bGate.SupportsCFFT,-23}{bGate.SupportsLWTT,-23}");
     }
 }
+
+
+
+//method to display menu
+void DisplayMenu()
+{
+    Console.WriteLine("\n\n\n\n\n\n");
+    Console.WriteLine("=============================================");
+    Console.WriteLine("Welcome to Changi Airport Terminal 5");
+    Console.WriteLine("=============================================");
+    Console.WriteLine("1. List All Flights");
+    Console.WriteLine("2. List Boarding Gates");
+    Console.WriteLine("3. Assign a Boarding Gate to a Flight");
+    Console.WriteLine("4. Create Flight");
+    Console.WriteLine("5. Display Airline Flights");
+    Console.WriteLine("6. Modify Flight Detail");
+    Console.WriteLine("7. Display Flight Schedule");
+    Console.WriteLine("0. Exit");
+    Console.WriteLine("");
+}
+
+//main
+CreateAirlines(airlineDict);
+CreateBoardingGates(boardingGateDict);
+Console.WriteLine("Loading Airlines...");
+Console.WriteLine($"{airlineDict.Count} Airlines Loaded!");
+Console.WriteLine($"Loading Boarding Gates...");
+Console.WriteLine($"{boardingGateDict.Count} Airlines Loaded!");
+Console.WriteLine($"Loading Flights...");
+Console.WriteLine($"{flightDict.Count} Flights Loaded!");
+
+while (true)
+{
+    DisplayMenu();
+    Console.WriteLine("Please select your option:");
+    string? option = Console.ReadLine();
+    if (option == "0")
+    {
+        Console.WriteLine("Goodbye!");
+        break;
+    }
+    else if (option == "1")
+    {
+
+    }
+    else if (option == "2")
+    {
+        DisplayAllBoardingGates(boardingGateDict);
+    }
+    else if (option == "3")
+    {
+
+    }
+    else if (option == "4")
+    {
+
+    }
+    else if (option == "5")
+    {
+
+    }
+    else if (option == "6")
+    {
+
+    }
+    else if (option == "7")
+    {
+
+    }
+    else
+    {
+        Console.WriteLine("Invalid option! Please try again.");
+    }
+}
