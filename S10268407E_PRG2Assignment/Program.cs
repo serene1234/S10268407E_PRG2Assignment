@@ -60,12 +60,82 @@ void DisplayAllBoardingGates(Dictionary<string, BoardingGate> bGateDict)
     }
 }
 
-
+//Feature 7
+//method to display all airlines available
+void DisplayAllAirlines(Dictionary<string, Airline> airlineDict)
+{
+    Console.WriteLine("=============================================\r\nList of Airlines for Changi Airport Terminal 5\r\n=============================================");
+    Console.WriteLine($"{"Airline Code",-16}{"Airline Name",-18}");
+    foreach (var airline in airlineDict.Values)
+    {
+        Console.WriteLine($"{airline.Name,-16}{airline.Code,-18}");
+    }
+    Console.WriteLine("Enter Airline Code: ");
+    string? code = Console.ReadLine();
+    if (airlineDict.ContainsKey(code))
+    {
+        DisplayAirlineFlights(code);
+    }
+    else
+    {
+        Console.WriteLine("Invalid Airline Code!");
+        return;
+    }
+}
+//method to display list of flights for a specific airline
+void DisplayAirlineFlights(string code)
+{
+    Airline airline = airlineDict[code];
+    Console.WriteLine($"=============================================\r\nList of Flights for {airline.Name}\r\n=============================================");
+    Console.WriteLine($"{"Airline Number",-16}{"Origin",-18}{"Destination",-18}");
+    foreach (var flight in airline.Flights.Values)
+    {
+        Console.WriteLine($"{flight.FlightNumber,-16}{flight.Origin,-18}{flight.Destination,-18}");
+    }
+    Console.WriteLine("Enter Flight Number: ");
+    string? flightNo = Console.ReadLine();
+    if (airline.Flights.ContainsKey(flightNo))
+    {
+        DisplayFlightDetails(flightNo, airline);
+    }
+    else
+    {
+        Console.WriteLine("Invalid Flight Number!");
+        return;
+    }
+}
+//method to display flight details
+void DisplayFlightDetails(string flightNo, Airline airline)
+{
+    Console.WriteLine("Enter Flight Number:");
+    string flightNumber = Console.ReadLine();
+    Console.WriteLine($"=============================================\r\nFlight Details for {flightNumber}\r\n=============================================");
+    if (flightDict.ContainsKey(flightNumber))
+    {
+        Flight flight = flightDict[flightNumber];
+        string? specialRequest = "";
+        string? boardingGate = "";
+        if (flight.SpecialRequestCode != null)
+        {
+            specialRequest = flight.SpecialRequestCode;
+        }
+        if (flight.BoardingGate != null)
+        {
+            boardingGate = flight.BoardingGate.GateName;
+        }
+        Console.WriteLine($"{"Flight Number",-16}{"Airline Name",-24}{"Origin",-20}{"Destination",-20}{"Expected Departure/Arrival Time",-32}{"Special Request Code",-20}{"Boarding Gate",-13}");
+        Console.WriteLine($"{flight.FlightNumber,-16}{airline.Name,-24}{flight.Origin,-20}{flight.Destination,-20}{flight.ExpectedTime,-32}{specialRequest,-20}{boardingGate,-13}");
+    }
+    else
+    {
+        Console.WriteLine("Invalid Flight Number!");
+    }
+}
 
 //method to display menu
 void DisplayMenu()
 {
-    Console.WriteLine("\n\n\n\n\n\n");
+    Console.WriteLine("\n\n\n\n\n\n\n\n");
     Console.WriteLine("=============================================");
     Console.WriteLine("Welcome to Changi Airport Terminal 5");
     Console.WriteLine("=============================================");
@@ -118,7 +188,7 @@ while (true)
     }
     else if (option == "5")
     {
-
+        DisplayAllAirlines(airlineDict);
     }
     else if (option == "6")
     {
