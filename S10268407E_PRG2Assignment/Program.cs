@@ -95,6 +95,27 @@ static void LoadFlights()
     }
 }
 
+//Feature 3
+static void ListAllFlights()
+{
+    Console.WriteLine("=============================================");
+    Console.WriteLine("List of Flights for Changi Airport Terminal 5");
+    Console.WriteLine("=============================================");
+    Console.WriteLine("{0,-15} {1,-20} {2,-20} {3,-20} {4}",
+                    "Flight Number", "Airline Name", "Origin", "Destination",
+                    "Expected Departure/Arrival Time");
+
+    foreach (Flight flight in flightList)
+    {
+        Console.WriteLine("{0,-15} {1,-20} {2,-20} {3,-20} {4}",
+                        flight.FlightNumber,
+                        GetAirlineName(flight.FlightNumber),
+                        flight.Origin,
+                        flight.Destination,
+                        flight.ExpectedTime.ToString("dd/M/yyyy h:mm:ss tt"));
+    }
+}
+
 //Feature 4
 //method to display all boarding gates
 void DisplayAllBoardingGates(Dictionary<string, BoardingGate> bGateDict)
