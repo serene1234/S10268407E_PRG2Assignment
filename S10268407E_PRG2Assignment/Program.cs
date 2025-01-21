@@ -5,6 +5,7 @@
 //==========================================================
 using S10268407E_PRG2Assignment;
 using System.Collections.Generic;
+using System.Globalization;
 
 //Feature 1
 //create airline and boarding gate dictionary
@@ -45,6 +46,52 @@ void CreateBoardingGates(Dictionary<string, BoardingGate> bGateDict)
             bool supportsLWTT = Convert.ToBoolean(data[3]);
             bGateDict.Add(gateName, new BoardingGate(gateName, supportsDDJB, supportsCFFT, supportsLWTT));
         }
+    }
+}
+
+//Feature 2
+static void LoadFlights()
+{
+    try
+    {
+        string[] lines = File.ReadAllLines("flights.csv");
+        for (int i = 1; i < lines.Length; i++) //skip header
+        {
+            string[] parts = lines[i].Split(',');
+            if (parts.Length >= 5)
+            {
+                string flightNum = parts[0];
+                string origin = parts[1];
+                string dest = parts[2];
+                DateTime time = DateTime.ParseExact(parts[3], "dd/M/yyyy HH:mm:ss tt",
+                                                  CultureInfo.InvariantCulture);
+                string specialCode = parts[4];
+
+                Flight flight;
+                //create appropriate flight type based on special code
+                switch (specialCode.ToUpper())
+                {
+                    case "DDJB":
+                        flight = new DDJBFlight(flightNum, origin, dest, time);
+                        break;
+                    case "CFFT":
+                        flight = new CFTTFlight(flightNum, origin, dest, time);
+                        break;
+                    case "LWTT":
+                        flight = new LWTTFlight(flightNum, origin, dest, time);
+                        break;
+                    default:
+                        flight = new Flight(flightNum, origin, dest, time);
+                        break;
+                }
+                flightList.Add(flight);
+            }
+        }
+        Console.WriteLine($"{flightList.Count} Flights Loaded!");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error loading flights: {ex.Message}");
     }
 }
 
