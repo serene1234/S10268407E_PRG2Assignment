@@ -12,56 +12,54 @@ using System.Threading.Tasks;
 
 namespace S10268407E_PRG2Assignment
 {
-    public class Flight : IComparable<Flight>
+    class Flight : IComparable<Flight>
     {
-        // Properties
+        //properties
         public string FlightNumber { get; set; }
         public string Origin { get; set; }
         public string Destination { get; set; }
         public DateTime ExpectedTime { get; set; }
-        public string Status { get; set; } = "Scheduled"; // Default status
+        public string Status { get; set; }
+        private BoardingGate assignedGate;
 
-        // Constructor
-        public Flight() { }
-
-        public Flight(string flightNum, string origin, string dest, DateTime time)
+        //constructor
+        public Flight(string flightNum, string origin, string dest, DateTime expectedTime)
         {
             FlightNumber = flightNum;
             Origin = origin;
             Destination = dest;
-            ExpectedTime = time;
+            ExpectedTime = expectedTime;
+            Status = "Scheduled"; //default status
         }
 
-        // Methods
+        //calculate fees based on flight type
         public virtual double CalculateFees()
         {
-            // Base calculation logic
             double fees = 0;
+            //base fee calculation
+            if (Origin == "Singapore (SIN)")
+                fees += 800; //departing flight fee
+            else if (Destination == "Singapore (SIN)")
+                fees += 500; //arriving flight fee
 
-            // Check if arriving or departing from Singapore
-            if (Destination.Contains("SIN"))
-                fees += 500; // Arriving flight fee
-            if (Origin.Contains("SIN"))
-                fees += 800; // Departing flight fee
+            if (assignedGate != null)
+                fees += 300; //base boarding gate fee
 
             return fees;
         }
 
-        // Required for IComparable implementation - Used in Feature 9
+        //Feature 9
         public int CompareTo(Flight other)
         {
             if (other == null) return 1;
             return ExpectedTime.CompareTo(other.ExpectedTime);
         }
 
-        // ToString override for displaying flight information
+        //override ToString for display
         public override string ToString()
         {
-            return $"Flight Number: {FlightNumber}\n" +
-                   $"Origin: {Origin}\n" +
-                   $"Destination: {Destination}\n" +
-                   $"Expected Time: {ExpectedTime:dd/M/yyyy h:mm:ss tt}\n" +
-                   $"Status: {Status}";
+            string gateInfo = assignedGate != null ? assignedGate.GateName : "Unassigned";
+            return $"{FlightNumber,-12} {Origin,-20} {Destination,-20} {ExpectedTime.ToString("dd/M/yyyy h:mm:ss tt"),-25} {Status,-15} {gateInfo}";
         }
     }
 }

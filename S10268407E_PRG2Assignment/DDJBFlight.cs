@@ -12,28 +12,28 @@ using System.Threading.Tasks;
 
 namespace S10268407E_PRG2Assignment
 {
-    public class DDJBFlight : Flight
+    class DDJBFlight : Flight
     {
         //properties
-        public double RequestFee { get; set; } = 300; //DDJB specific request fee
+        public double RequestFee { get; private set; }
 
         //constructor
-        public DDJBFlight(string flightNum, string origin, string dest, DateTime time)
-            : base(flightNum, origin, dest, time)
-        { }
-
-        //override CalculateFees to include DDJB specific charges
-        public override double CalculateFees()
+        public DDJBFlight(string flightNum, string origin, string dest, DateTime expectedTime)
+            : base(flightNum, origin, dest, expectedTime)
         {
-            double baseFees = base.CalculateFees();
-            //add DDJB request fee
-            return baseFees + RequestFee;
+            RequestFee = 300.0; //DDJB code request fee
         }
 
-        //override ToString to include DDJB specific information
+        //calculate fees including DDJB fee
+        public override double CalculateFees()
+        {
+            return base.CalculateFees() + RequestFee;
+        }
+
+        //override ToString for display
         public override string ToString()
         {
-            return base.ToString() + $"\nSpecial Request Code: DDJB";
+            return base.ToString() + " [DDJB]";
         }
     }
 }

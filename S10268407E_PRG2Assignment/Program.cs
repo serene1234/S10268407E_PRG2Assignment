@@ -50,69 +50,68 @@ void CreateBoardingGates(Dictionary<string, BoardingGate> bGateDict)
 }
 
 //Feature 2
-static void LoadFlights()
+void CreateFlights(Dictionary<string, Flight> flightDict)
 {
-    try
+    using (StreamReader sr = new StreamReader("flights.csv"))
     {
-        string[] lines = File.ReadAllLines("flights.csv");
-        for (int i = 1; i < lines.Length; i++) //skip header
+        //read the header line
+        string? s = sr.ReadLine();
+        //read the data lines
+        while ((s = sr.ReadLine()) != null)
         {
-            string[] parts = lines[i].Split(',');
-            if (parts.Length >= 5)
-            {
-                string flightNum = parts[0];
-                string origin = parts[1];
-                string dest = parts[2];
-                DateTime time = DateTime.ParseExact(parts[3], "dd/M/yyyy HH:mm:ss tt",
-                                                  CultureInfo.InvariantCulture);
-                string specialCode = parts[4];
+            string[] data = s.Split(',');
+            string flightNum = data[0];
+            string origin = data[1];
+            string destination = data[2];
+            DateTime expectedTime = DateTime.Parse(data[3]);
+            string specialCode = data.Length > 4 ? data[4] : "";
 
-                Flight flight;
-                //create appropriate flight type based on special code
-                switch (specialCode.ToUpper())
-                {
-                    case "DDJB":
-                        flight = new DDJBFlight(flightNum, origin, dest, time);
-                        break;
-                    case "CFFT":
-                        flight = new CFTTFlight(flightNum, origin, dest, time);
-                        break;
-                    case "LWTT":
-                        flight = new LWTTFlight(flightNum, origin, dest, time);
-                        break;
-                    default:
-                        flight = new Flight(flightNum, origin, dest, time);
-                        break;
-                }
-                flightList.Add(flight);
+            //create flight based on special code
+            Flight flight;
+            switch (specialCode.ToUpper())
+            {
+                case "DDJB":
+                    flight = new DDJBFlight(flightNum, origin, destination, expectedTime);
+                    break;
+                case "CFFT":
+                    flight = new CFFTFlight(flightNum, origin, destination, expectedTime);
+                    break;
+                case "LWTT":
+                    flight = new LWTTFlight(flightNum, origin, destination, expectedTime);
+                    break;
+                default:
+                    flight = new NORMFlight(flightNum, origin, destination, expectedTime);
+                    break;
+            }
+
+            //add flight to dictionary
+            flightDict.Add(flightNum, flight);
+
+            //add flight to corresponding airline
+            string airlineCode = flightNum.Split(' ')[0];
+            if (airlineDict.ContainsKey(airlineCode))
+            {
+                airlineDict[airlineCode].AddFlight(flight);
             }
         }
-        Console.WriteLine($"{flightList.Count} Flights Loaded!");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Error loading flights: {ex.Message}");
     }
 }
 
 //Feature 3
-static void ListAllFlights()
+void ListAllFlights()
 {
     Console.WriteLine("=============================================");
     Console.WriteLine("List of Flights for Changi Airport Terminal 5");
     Console.WriteLine("=============================================");
-    Console.WriteLine("{0,-15} {1,-20} {2,-20} {3,-20} {4}",
-                    "Flight Number", "Airline Name", "Origin", "Destination",
-                    "Expected Departure/Arrival Time");
+    Console.WriteLine("{0,-12} {1,-20} {2,-20} {3,-20} {4}",
+                    "Flight No", "Origin", "Destination", "Expected Time", "Status");
 
-    foreach (Flight flight in flightList)
+    foreach (var flight in flightDict.Values)
     {
-        Console.WriteLine("{0,-15} {1,-20} {2,-20} {3,-20} {4}",
-                        flight.FlightNumber,
-                        GetAirlineName(flight.FlightNumber),
-                        flight.Origin,
-                        flight.Destination,
-                        flight.ExpectedTime.ToString("dd/M/yyyy h:mm:ss tt"));
+        string airlineCode = flight.FlightNumber.Split(' ')[0];
+        string airlineName = airlineDict[airlineCode].Name;
+        Console.WriteLine($"{flight.FlightNumber,-12} {airlineName,-20} {flight.Origin,-20} " +
+                        $"{flight.Destination,-20} {flight.ExpectedTime:dd/M/yyyy h:mm:ss tt}");
     }
 }
 
@@ -129,49 +128,33 @@ void DisplayAllBoardingGates(Dictionary<string, BoardingGate> bGateDict)
 }
 
 //Feature 5
-static void AssignBoardingGate()
+void DisplayAirlineFlights()
 {
-    Console.WriteLine("Enter Flight Number:");
-    string flightNum = Console.ReadLine();
+    Console.WriteLine("=============================================");
+    Console.WriteLine("List of Airlines for Changi Airport Terminal 5");
+    Console.WriteLine("=============================================");
 
-    Flight flight = flightList.Find(f => f.FlightNumber == flightNum);
-    if (flight == null)
+    foreach (var airline in airlineDict.Values)
     {
-        Console.WriteLine("Flight not found!");
-        return;
+        Console.WriteLine($"{airline.Code} {airline.Name}");
     }
 
-    Console.WriteLine(flight.ToString());
+    Console.Write("\nEnter Airline Code: ");
+    string code = Console.ReadLine().ToUpper();
 
-    Console.WriteLine("\nEnter Boarding Gate Name:");
-    string gateName = Console.ReadLine();
-
-    //here you would add logic to check if gate is available
-    //and matches any special requirements
-
-    Console.WriteLine("Would you like to update the status of the flight? (Y/N)");
-    if (Console.ReadLine().ToUpper() == "Y")
+    if (airlineDict.ContainsKey(code))
     {
-        Console.WriteLine("1. Delayed");
-        Console.WriteLine("2. Boarding");
-        Console.WriteLine("3. On Time");
-        Console.WriteLine("Please select the new status of the flight:");
-        string statusChoice = Console.ReadLine();
-        switch (statusChoice)
+        var airline = airlineDict[code];
+        Console.WriteLine("\nList of Flights for {0}", airline.Name);
+        foreach (var flight in airline.GetFlights())
         {
-            case "1":
-                flight.Status = "Delayed";
-                break;
-            case "2":
-                flight.Status = "Boarding";
-                break;
-            case "3":
-                flight.Status = "On Time";
-                break;
+            Console.WriteLine(flight.ToString());
         }
     }
-
-    Console.WriteLine($"Flight {flightNum} has been assigned to Boarding Gate {gateName}!");
+    else
+    {
+        Console.WriteLine("Invalid airline code!");
+    }
 }
 
 //Feature 7

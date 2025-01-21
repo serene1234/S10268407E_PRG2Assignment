@@ -12,26 +12,28 @@ using System.Threading.Tasks;
 
 namespace S10268407E_PRG2Assignment
 {
-    public class CFTTFlight : Flight
+    class CFFTFlight : Flight
     {
         //properties
-        public double RequestFee { get; set; } = 150; //CFFT specific request fee
+        public double RequestFee { get; private set; }
 
         //constructor
-        public CFTTFlight(string flightNum, string origin, string dest, DateTime time)
-            : base(flightNum, origin, dest, time) { }
-
-        //override CalculateFees to include CFFT specific charges
-        public override double CalculateFees()
+        public CFFTFlight(string flightNum, string origin, string dest, DateTime expectedTime)
+            : base(flightNum, origin, dest, expectedTime)
         {
-            double baseFees = base.CalculateFees();
-            return baseFees + RequestFee;
+            RequestFee = 150.0; //CFFT code request fee
         }
 
-        //override ToString to include CFFT specific information
+        //calculate fees including CFFT fee
+        public override double CalculateFees()
+        {
+            return base.CalculateFees() + RequestFee;
+        }
+
+        //override ToString for display
         public override string ToString()
         {
-            return base.ToString() + $"\nSpecial Request Code: CFFT";
+            return base.ToString() + " [CFFT]";
         }
     }
 }

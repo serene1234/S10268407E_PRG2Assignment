@@ -12,26 +12,28 @@ using System.Threading.Tasks;
 
 namespace S10268407E_PRG2Assignment
 {
-    public class LWTTFlight : Flight
+    class LWTTFlight : Flight
     {
         //properties
-        public double RequestFee { get; set; } = 500; //LWTT specific request fee
+        public double RequestFee { get; private set; }
 
         //constructor
-        public LWTTFlight(string flightNum, string origin, string dest, DateTime time)
-            : base(flightNum, origin, dest, time) { }
-
-        //override CalculateFees to include LWTT specific charges
-        public override double CalculateFees()
+        public LWTTFlight(string flightNum, string origin, string dest, DateTime expectedTime)
+            : base(flightNum, origin, dest, expectedTime)
         {
-            double baseFees = base.CalculateFees();
-            return baseFees + RequestFee;
+            RequestFee = 500.0; //LWTT code request fee
         }
 
-        //override ToString to include LWTT specific information
+        //calculate fees including LWTT fee
+        public override double CalculateFees()
+        {
+            return base.CalculateFees() + RequestFee;
+        }
+
+        //override ToString for display
         public override string ToString()
         {
-            return base.ToString() + $"\nSpecial Request Code: LWTT";
+            return base.ToString() + " [LWTT]";
         }
     }
 }
