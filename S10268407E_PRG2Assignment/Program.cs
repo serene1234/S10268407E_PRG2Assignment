@@ -128,6 +128,52 @@ void DisplayAllBoardingGates(Dictionary<string, BoardingGate> bGateDict)
     }
 }
 
+//Feature 5
+static void AssignBoardingGate()
+{
+    Console.WriteLine("Enter Flight Number:");
+    string flightNum = Console.ReadLine();
+
+    Flight flight = flightList.Find(f => f.FlightNumber == flightNum);
+    if (flight == null)
+    {
+        Console.WriteLine("Flight not found!");
+        return;
+    }
+
+    Console.WriteLine(flight.ToString());
+
+    Console.WriteLine("\nEnter Boarding Gate Name:");
+    string gateName = Console.ReadLine();
+
+    //here you would add logic to check if gate is available
+    //and matches any special requirements
+
+    Console.WriteLine("Would you like to update the status of the flight? (Y/N)");
+    if (Console.ReadLine().ToUpper() == "Y")
+    {
+        Console.WriteLine("1. Delayed");
+        Console.WriteLine("2. Boarding");
+        Console.WriteLine("3. On Time");
+        Console.WriteLine("Please select the new status of the flight:");
+        string statusChoice = Console.ReadLine();
+        switch (statusChoice)
+        {
+            case "1":
+                flight.Status = "Delayed";
+                break;
+            case "2":
+                flight.Status = "Boarding";
+                break;
+            case "3":
+                flight.Status = "On Time";
+                break;
+        }
+    }
+
+    Console.WriteLine($"Flight {flightNum} has been assigned to Boarding Gate {gateName}!");
+}
+
 //Feature 7
 //method to display all airlines available
 void DisplayAllAirlines(Dictionary<string, Airline> airlineDict)
