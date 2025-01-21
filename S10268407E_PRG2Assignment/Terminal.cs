@@ -29,25 +29,25 @@ namespace S10268407E_PRG2Assignment
         }
         public bool AddAirLine(Airline airline)
         {
-            if (Airlines.ContainsKey(airline.AirlineName))
+            if (Airlines.ContainsKey(airline.Name))
             {
                 return false;
             }
             else
             {
-                Airlines.Add(airline.AirlineName, airline);
+                Airlines.Add(airline.Name, airline);
                 return true;
             }
         }
         public bool AddBoardingGate(BoardingGate boardingGate)
         {
-            if (BoardingGates.ContainsKey(boardingGate.GateNumber))
+            if (BoardingGates.ContainsKey(boardingGate.GateName))
             {
                 return false;
             }
             else
             {
-                BoardingGates.Add(boardingGate.GateNumber, boardingGate);
+                BoardingGates.Add(boardingGate.GateName, boardingGate);
                 return true;
             }
         }
