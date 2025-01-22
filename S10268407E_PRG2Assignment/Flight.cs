@@ -20,7 +20,6 @@ namespace S10268407E_PRG2Assignment
         public string Destination { get; set; }
         public DateTime ExpectedTime { get; set; }
         public string Status { get; set; }
-        private BoardingGate assignedGate;
 
         //constructor
         public Flight(string flightNum, string origin, string dest, DateTime expectedTime)
@@ -35,16 +34,12 @@ namespace S10268407E_PRG2Assignment
         //calculate fees based on flight type
         public virtual double CalculateFees()
         {
-            double fees = 0;
-            //base fee calculation
+            double fees = 0; //base fee of 300
+            //fees calculation
             if (Origin == "Singapore (SIN)")
                 fees += 800; //departing flight fee
             else if (Destination == "Singapore (SIN)")
                 fees += 500; //arriving flight fee
-
-            if (assignedGate != null)
-                fees += 300; //base boarding gate fee
-
             return fees;
         }
 
@@ -58,8 +53,7 @@ namespace S10268407E_PRG2Assignment
         //override ToString for display
         public override string ToString()
         {
-            string gateInfo = assignedGate != null ? assignedGate.GateName : "Unassigned";
-            return $"{FlightNumber,-12} {Origin,-20} {Destination,-20} {ExpectedTime.ToString("dd/M/yyyy h:mm:ss tt"),-25} {Status,-15} {gateInfo}";
+            return $"{FlightNumber,-12} {Origin,-20} {Destination,-20} {ExpectedTime.ToString("dd/M/yyyy h:mm:ss tt"),-25} {Status,-15}";
         }
     }
 }

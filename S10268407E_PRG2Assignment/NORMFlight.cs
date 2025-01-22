@@ -16,9 +16,7 @@ namespace S10268407E_PRG2Assignment
     {
         //constructor
         public NORMFlight(string flightNum, string origin, string dest, DateTime expectedTime)
-            : base(flightNum, origin, dest, expectedTime)
-        {
-        }
+            : base(flightNum, origin, dest, expectedTime) { }
 
         //calculate fees for normal flights
         public override double CalculateFees()
