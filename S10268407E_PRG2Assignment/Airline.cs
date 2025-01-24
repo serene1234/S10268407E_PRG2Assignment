@@ -17,6 +17,7 @@ namespace S10268407E_PRG2Assignment
         public string Name { get; set; }
         public string Code { get; set; }
         public Dictionary<string, Flight> Flights { get; set; }
+        public Airline() { }
         public Airline(string name, string code)
         {
             Name = name;
