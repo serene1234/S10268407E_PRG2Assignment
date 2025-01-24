@@ -605,3 +605,108 @@ void DisplayFlightSchedule()
                          $"{flight.Status,-15} {gate}");
     }
 }
+
+////Advanced Feature (a)
+//void ProcessUnassignedFlights()
+//{
+//    //create queue for unassigned flights
+//    Queue<Flight> unassignedFlights = new Queue<Flight>();
+//    int totalUnassigned = 0;
+//    int totalUnassignedGates = 0;
+
+//    //check for unassigned flights
+//    foreach (var flight in flightDict.Values)
+//    {
+//        if (!flightToGateDict.ContainsKey(flight.FlightNumber))
+//        {
+//            unassignedFlights.Enqueue(flight);
+//            totalUnassigned++;
+//        }
+//    }
+//    Console.WriteLine($"Total unassigned flights: {totalUnassigned}");
+
+//    //count available gates
+//    var availableGates = boardingGateDict.Values
+//        .Where(g => !flightToGateDict.Values.Contains(g))
+//        .ToList();
+//    totalUnassignedGates = availableGates.Count;
+//    Console.WriteLine($"Total available gates: {totalUnassignedGates}");
+
+//    if (totalUnassigned == 0)
+//    {
+//        Console.WriteLine("No unassigned flights to process.");
+//        return;
+//    }
+
+//    int processedCount = 0;
+//    int automaticAssignments = 0;
+
+//    //process each unassigned flight
+//    while (unassignedFlights.Count > 0 && availableGates.Count > 0)
+//    {
+//        var flight = unassignedFlights.Dequeue();
+//        BoardingGate assignedGate = null;
+
+//        //check flight type and find matching gate
+//        if (flight is DDJBFlight)
+//        {
+//            assignedGate = availableGates.FirstOrDefault(g => g.SupportsDDJB);
+//        }
+//        else if (flight is CFFTFlight)
+//        {
+//            assignedGate = availableGates.FirstOrDefault(g => g.SupportsCFFT);
+//        }
+//        else if (flight is LWTTFlight)
+//        {
+//            assignedGate = availableGates.FirstOrDefault(g => g.SupportsLWTT);
+//        }
+//        else //NORMFlight
+//        {
+//            assignedGate = availableGates.FirstOrDefault(g =>
+//                !g.SupportsDDJB && !g.SupportsCFFT && !g.SupportsLWTT);
+//        }
+
+//        //if found matching gate, assign it
+//        if (assignedGate != null)
+//        {
+//            flightToGateDict[flight.FlightNumber] = assignedGate;
+//            availableGates.Remove(assignedGate);
+//            automaticAssignments++;
+
+//            //display assignment details
+//            string airlineCode = flight.FlightNumber.Split(' ')[0];
+//            string airlineName = airlineDict.ContainsKey(airlineCode) ? airlineDict[airlineCode].Name : "Unknown";
+
+//            Console.WriteLine("\nAssigned Flight:");
+//            Console.WriteLine($"{"Flight No",-12} {"Airline",-20} {"Origin",-20} {"Destination",-20} " +
+//                            $"{"Expected Time",-25} {"Special Request",-15} {"Assigned Gate"}");
+
+//            string specialRequest = flight switch
+//            {
+//                DDJBFlight => "DDJB",
+//                CFFTFlight => "CFFT",
+//                LWTTFlight => "LWTT",
+//                _ => "None"
+//            };
+
+//            Console.WriteLine($"{flight.FlightNumber,-12} {airlineName,-20} {flight.Origin,-20} " +
+//                            $"{flight.Destination,-20} {flight.ExpectedTime:dd/M/yyyy h:mm:ss tt,-25} " +
+//                            $"{specialRequest,-15} {assignedGate.GateName}");
+//        }
+
+//        processedCount++;
+//    }
+
+//    //display summary
+//    Console.WriteLine("\nAssignment Summary:");
+//    Console.WriteLine($"Total flights processed: {processedCount}");
+//    Console.WriteLine($"Successful automatic assignments: {automaticAssignments}");
+
+//    double automaticPercentage = (double)automaticAssignments / totalUnassigned * 100;
+//    Console.WriteLine($"Automatic assignment percentage: {automaticPercentage:F1}%");
+
+//    if (unassignedFlights.Count > 0)
+//    {
+//        Console.WriteLine($"\nWarning: {unassignedFlights.Count} flights remain unassigned due to insufficient matching gates.");
+//    }
+//}
