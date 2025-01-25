@@ -148,9 +148,87 @@ void DisplayAllBoardingGates(Dictionary<string, BoardingGate> bGateDict)
     }
 }
 
-
 //Feature 5
 void AssignBoardingGate()
+{
+    Console.WriteLine("=============================================");
+    Console.WriteLine("Assign a Boarding Gate to a Flight");
+    Console.WriteLine("=============================================");
+
+    Console.WriteLine("Enter Flight Number:");
+    string? flightNo = Console.ReadLine();
+
+    if (string.IsNullOrEmpty(flightNo) || !flightDict.ContainsKey(flightNo))
+    {
+        Console.WriteLine("Invalid Flight Number!");
+        return;
+    }
+
+    Flight flight = flightDict[flightNo];
+    string airlineCode = flight.FlightNumber.Split(' ')[0];
+    string airlineName = airlineDict.ContainsKey(airlineCode) ? airlineDict[airlineCode].Name : "Unknown";
+
+    //display flight details
+    Console.WriteLine($"Flight Number: {flight.FlightNumber}");
+    Console.WriteLine($"Origin: {flight.Origin}");
+    Console.WriteLine($"Destination: {flight.Destination}");
+    Console.WriteLine($"Expected Time: {flight.ExpectedTime:dd/M/yyyy h:mm:ss tt}");
+
+    Console.WriteLine("\nEnter Boarding Gate Name:");
+    string? gateName = Console.ReadLine();
+
+    if (string.IsNullOrEmpty(gateName) || !boardingGateDict.ContainsKey(gateName))
+    {
+        Console.WriteLine("Invalid Boarding Gate!");
+        return;
+    }
+
+    BoardingGate gate = boardingGateDict[gateName];
+
+    //check if gate is already assigned
+    if (flightToGateDict.Values.Contains(gate))
+    {
+        Console.WriteLine("Gate is already assigned to another flight!");
+        return;
+    }
+
+    //display gate details
+    Console.WriteLine($"Boarding Gate Name: {gate.GateName}");
+    Console.WriteLine($"Supports DDJB: {gate.SupportsDDJB}");
+    Console.WriteLine($"Supports CFFT: {gate.SupportsCFFT}");
+    Console.WriteLine($"Supports LWTT: {gate.SupportsLWTT}");
+
+    Console.WriteLine("\nWould you like to update the status of the flight? (Y/N)");
+    string? response = Console.ReadLine()?.ToUpper();
+
+    if (response == "Y")
+    {
+        Console.WriteLine("1. Delayed");
+        Console.WriteLine("2. Boarding");
+        Console.WriteLine("3. On Time");
+        Console.WriteLine("Please select the new status of the flight:");
+
+        if (int.TryParse(Console.ReadLine(), out int statusChoice))
+        {
+            switch (statusChoice)
+            {
+                case 1:
+                    flight.Status = "Delayed";
+                    break;
+                case 2:
+                    flight.Status = "Boarding";
+                    break;
+                case 3:
+                    flight.Status = "On Time";
+                    break;
+                default:
+                    flight.Status = "On Time";
+                    break;
+            }
+        }
+    }
+}
+/*void AssignBoardingGate()
 {
     Console.WriteLine("=============================================");
     Console.WriteLine("Assign a Boarding Gate to a Flight");
@@ -240,86 +318,6 @@ void AssignBoardingGate()
             DisplayFlightDetails(flightNo, flightDict, airlineDict[flightNo.Split(' ')[0]]);
 
             return; // Exit the method after successful assignment
-        }
-    }
-}
-//Feature 5
-/*void AssignBoardingGate()
-{
-    Console.WriteLine("=============================================");
-    Console.WriteLine("Assign a Boarding Gate to a Flight");
-    Console.WriteLine("=============================================");
-
-    Console.WriteLine("Enter Flight Number:");
-    string? flightNo = Console.ReadLine();
-
-    if (string.IsNullOrEmpty(flightNo) || !flightDict.ContainsKey(flightNo))
-    {
-        Console.WriteLine("Invalid Flight Number!");
-        return;
-    }
-
-    Flight flight = flightDict[flightNo];
-    string airlineCode = flight.FlightNumber.Split(' ')[0];
-    string airlineName = airlineDict.ContainsKey(airlineCode) ? airlineDict[airlineCode].Name : "Unknown";
-
-    //display flight details
-    Console.WriteLine($"Flight Number: {flight.FlightNumber}");
-    Console.WriteLine($"Origin: {flight.Origin}");
-    Console.WriteLine($"Destination: {flight.Destination}");
-    Console.WriteLine($"Expected Time: {flight.ExpectedTime:dd/M/yyyy h:mm:ss tt}");
-
-    Console.WriteLine("\nEnter Boarding Gate Name:");
-    string? gateName = Console.ReadLine();
-
-    if (string.IsNullOrEmpty(gateName) || !boardingGateDict.ContainsKey(gateName))
-    {
-        Console.WriteLine("Invalid Boarding Gate!");
-        return;
-    }
-
-    BoardingGate gate = boardingGateDict[gateName];
-
-    //check if gate is already assigned
-    if (flightToGateDict.Values.Contains(gate))
-    {
-        Console.WriteLine("Gate is already assigned to another flight!");
-        return;
-    }
-
-    //display gate details
-    Console.WriteLine($"Boarding Gate Name: {gate.GateName}");
-    Console.WriteLine($"Supports DDJB: {gate.SupportsDDJB}");
-    Console.WriteLine($"Supports CFFT: {gate.SupportsCFFT}");
-    Console.WriteLine($"Supports LWTT: {gate.SupportsLWTT}");
-
-    Console.WriteLine("\nWould you like to update the status of the flight? (Y/N)");
-    string? response = Console.ReadLine()?.ToUpper();
-
-    if (response == "Y")
-    {
-        Console.WriteLine("1. Delayed");
-        Console.WriteLine("2. Boarding");
-        Console.WriteLine("3. On Time");
-        Console.WriteLine("Please select the new status of the flight:");
-
-        if (int.TryParse(Console.ReadLine(), out int statusChoice))
-        {
-            switch (statusChoice)
-            {
-                case 1:
-                    flight.Status = "Delayed";
-                    break;
-                case 2:
-                    flight.Status = "Boarding";
-                    break;
-                case 3:
-                    flight.Status = "On Time";
-                    break;
-                default:
-                    flight.Status = "On Time";
-                    break;
-            }
         }
     }
 }*/
