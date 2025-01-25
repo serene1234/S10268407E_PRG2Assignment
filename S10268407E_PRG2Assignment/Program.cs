@@ -681,6 +681,89 @@ void DeleteFlight(Airline airline, Flight flight)
 
 //Advanced Feature (b)
 //method to calculate total fees per airline for the day
+void CalculateDailyFees(Dictionary<string, Airline> airlineDict, Dictionary<string, BoardingGate> boardingGateDict, Dictionary<string, Flight> flightDict)
+{
+    foreach (var airline in airlineDict.Values)
+    {
+        foreach (var flight in airline.Flights.Values)
+        {
+            bool isAssigned = false;
+            foreach (var bGate in boardingGateDict.Values)
+            {
+                if (bGate.Flight == flight)
+                {
+                    isAssigned = true;
+                    break;
+                }
+            }
+            if (!isAssigned)
+            {
+                Console.WriteLine($"Flight {flight.FlightNumber} is not assigned to any boarding gate!");
+                return;
+            }
+        }
+    }
+
+    double totalTerminalFees = 0;
+    double totalTerminalDiscounts = 0;
+
+    foreach (var airline in airlineDict.Values)
+    {
+        double airlineSubtotal = 0;
+        double airlineDiscounts = 0;
+        int flightCount = airline.Flights.Count;
+        int eligibleFlightDiscounts = 0;
+        foreach (var flight in airline.Flights.Values)
+        {
+            //calculate flight fees
+            double flightFee = flight.CalculateFees();
+            airlineSubtotal += flightFee;
+
+            //apply discounts for origin
+            if (flight.Origin == "Dubai (DXB)" || flight.Origin == "Bangkok (BKK)" || flight.Origin == "Tokyo (NRT)")
+            {
+                airlineDiscounts += 25;
+            }
+            //apply discounts for no special request
+            if (flight is NORMFlight)
+            {
+                airlineDiscounts += 50;
+            }
+            //apply discounts for expected time within discounted range
+            if (flight.ExpectedTime.Hour < 11 || flight.ExpectedTime.Hour > 21)
+            {
+                airlineDiscounts += 110;
+            }
+            //add to eligible flight discounts
+            eligibleFlightDiscounts++;
+        }
+        //apply discounts for every 3 flights
+        airlineDiscounts += (flightCount / 3) * 350;
+        //apply discounts for every 5 flights
+        if (flightCount > 5)
+        {
+            airlineSubtotal *= 0.03;
+        }
+        //calculate airline final total
+        double airlineFinalTotal = airlineSubtotal - airlineDiscounts;
+        //update total terminal fees and discounts
+        totalTerminalFees += airlineSubtotal;
+        totalTerminalDiscounts += airlineDiscounts;
+
+        //display fees per airline
+        Console.WriteLine($"Airline: {airline.Name}");
+        Console.WriteLine($"Subtotal Fees: ${airlineSubtotal:C2}");
+        Console.WriteLine($"Discounts Applied: -${airlineDiscounts:C2}");
+        Console.WriteLine($"Final Amount Charged: ${airlineFinalTotal:C2}");
+    }
+
+    //display total Terminal 5 revenue and discounts
+    Console.WriteLine("========== Terminal 5 Summary ==========");
+    Console.WriteLine($"Total Fees Before Discounts: ${totalTerminalFees:C2}");
+    Console.WriteLine($"Total Discounts Applied: -${totalTerminalDiscounts:C2}");
+    Console.WriteLine($"Final Fees Terminal 5 Will Collect: ${totalTerminalFees - totalTerminalDiscounts:C2}");
+    Console.WriteLine($"Discount Percentage: {((totalTerminalDiscounts / totalTerminalFees) * 100):F2}%");
+}
 
 //method to display menu
 void DisplayMenu()
@@ -696,6 +779,8 @@ void DisplayMenu()
     Console.WriteLine("5. Display Airline Flights");
     Console.WriteLine("6. Modify Flight Detail");
     Console.WriteLine("7. Display Flight Schedule");
+    Console.WriteLine("8. Process all unassigned flights to boarding gates in bulk");
+    Console.WriteLine("9. Display the total fee per airline for the day");
     Console.WriteLine("0. Exit");
     Console.WriteLine("");
 }
@@ -813,6 +898,14 @@ while (true)
     else if (option == "7")
     {
 
+    }
+    else if(option == "8")
+    {
+
+    }
+    else if (option == "9")
+    {
+        CalculateDailyFees(airlineDict, boardingGateDict, flightDict);
     }
     else
     {
