@@ -34,12 +34,12 @@ namespace S10268407E_PRG2Assignment
         //calculate fees based on flight type
         public virtual double CalculateFees()
         {
-            double fees = 0; //base fee of 300
+            double fees = 300; //base fee of 300
             //fees calculation
             if (Origin == "Singapore (SIN)")
-                fees = 800; //departing flight fee
+                fees += 800; //departing flight fee
             else if (Destination == "Singapore (SIN)")
-                fees = 500; //arriving flight fee
+                fees += 500; //arriving flight fee
             return fees;
         }
 

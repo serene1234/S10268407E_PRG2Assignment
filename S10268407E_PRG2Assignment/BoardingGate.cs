@@ -29,20 +29,7 @@ namespace S10268407E_PRG2Assignment
         }
         public double CalculateFees() 
         {
-            double baseFee = 300.0;
-            if (SupportsCFFT)
-            {
-                baseFee += 150.0;
-            }
-            else if (SupportsDDJB)
-            {
-                baseFee += 300.0;
-            }
-            else if (SupportsLWTT)
-            {
-                baseFee += 500.0;
-            }
-            return baseFee;
+            return 0;
         }
         public override string ToString()
         {
