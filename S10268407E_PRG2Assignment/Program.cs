@@ -163,7 +163,7 @@ void ListAllFlights()
 
     //define column headers with precise spacing for alignment
     Console.WriteLine($"{"Flight No",-12} {"Airline Name",-20} {"Origin",-20} {"Destination",-20} " +
-                   $"{"Expected Time",-25}");
+                   $"{"Expected Departure/Arrival Time",-25}");
 
     //sort all flights by expected time for chronological display
     //using LINQ OrderBy to sort the dictionary values
@@ -185,8 +185,8 @@ void ListAllFlights()
         //format each line with consistent column spacing
         //using DateTime format "dd/M/yyyy h:mm:ss tt" as per requirements
         Console.WriteLine($"{flight.FlightNumber,-12} {airlineName,-20} " +
-                       $"{flight.Origin,-20} {flight.Destination,-20} " +
-                       $"{flight.ExpectedTime:dd/M/yyyy h:mm:ss tt,-25}");
+                 $"{flight.Origin,-20} {flight.Destination,-20} " +
+                 $"{flight.ExpectedTime:dd/M/yyyy h:mm:ss tt}");
     }
 }
 
@@ -756,7 +756,7 @@ void DisplayFlightSchedule()
 
     //column headers matching sample output format exactly
     Console.WriteLine($"{"Flight No",-12} {"Airline",-20} {"Origin",-20} {"Destination",-20} " +
-                     $"{"Expected Time",-25} {"Status",-15} {"Gate"}");
+                     $"{"Expected Time",-20} {"Status",-12} {"Gate"}");
 
     //sort flights chronologically using IComparable implementation
     var sortedFlights = flightDict.Values
@@ -782,10 +782,10 @@ void DisplayFlightSchedule()
         }
 
         //display flight info in required format
+        string formattedTime = flight.ExpectedTime.ToString("dd/M/yyyy h:mm:ss tt");
         Console.WriteLine($"{flight.FlightNumber,-12} {airlineName,-20} " +
-                         $"{flight.Origin,-20} {flight.Destination,-20} " +
-                         $"{flight.ExpectedTime:dd/M/yyyy h:mm:ss tt,-25} " +
-                         $"{flight.Status,-15} {gateAssignment}");
+                       $"{flight.Origin,-20} {flight.Destination,-20} " +
+                       $"{formattedTime,-20} {flight.Status,-12} {gateAssignment}");
     }
 }
 
@@ -888,7 +888,7 @@ void ProcessUnassignedFlights()
 
             Console.WriteLine($"{flight.FlightNumber,-12} {airlineName,-20} " +
                             $"{flight.Origin,-20} {flight.Destination,-20} " +
-                            $"{flight.ExpectedTime:dd/M/yyyy h:mm:ss tt,-25} " +
+                            $"{flight.ExpectedTime:dd/M/yyyy h:mm:ss tt} " +
                             $"{specialRequest,-15} {assignedGate.GateName}");
         }
 
