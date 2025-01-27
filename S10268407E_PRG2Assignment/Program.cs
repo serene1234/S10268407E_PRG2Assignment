@@ -562,7 +562,10 @@ void ModifyFlightDetails(Airline airline, Flight flight)
             if (string.IsNullOrEmpty(destination)) throw new FormatException("Destination cannot be empty.");
             //get new expected time
             Console.Write("Enter new Expected Departure/Arrival Time (dd/mm/yyyy hh:mm): ");
-            DateTime expectedTime = Convert.ToDateTime(Console.ReadLine());
+            string? time = Console.ReadLine();
+            DateTime expectedTime;
+            if (string.IsNullOrEmpty(time)) throw new FormatException("Expected time cannot be empty.");
+            else expectedTime = DateTime.Parse(time);
             //update flight details
             flight.Origin = origin;
             flight.Destination = destination;
