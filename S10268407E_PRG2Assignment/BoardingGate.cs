@@ -33,7 +33,7 @@ namespace S10268407E_PRG2Assignment
         }
         public override string ToString()
         {
-            return "Gate Name: " + GateName + "\tSupports CFFT: " + SupportsCFFT + "\tSupports DDJB: " + SupportsDDJB + "\tSupports LWTT: " + SupportsLWTT;
+            return ($"{GateName,-16}{SupportsDDJB,-23}{SupportsCFFT,-23}{SupportsLWTT,-23}");
         }
     }
 }

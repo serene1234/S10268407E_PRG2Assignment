@@ -207,7 +207,7 @@ void DisplayAllBoardingGates(Dictionary<string, BoardingGate> bGateDict)
     //iterate through boarding gate dictionary and display details
     foreach (var bGate in bGateDict.Values)
     {
-        Console.WriteLine($"{bGate.GateName,-16}{bGate.SupportsDDJB,-23}{bGate.SupportsCFFT,-23}{bGate.SupportsLWTT,-23}");
+        Console.WriteLine(bGate.ToString());
     }
 }
 
@@ -402,7 +402,7 @@ void DisplayAllAirlines(Dictionary<string, Airline> airlineDict)
     //iterate through airline dictionary and display details
     foreach (var airline in airlineDict.Values)
     {
-        Console.WriteLine($"{airline.Code,-16}{airline.Name,-18}");
+        Console.WriteLine(airline.ToString());
     }
 }
 //method to display list of flights for a specific airline and returns airline object
@@ -625,13 +625,24 @@ void ModifyFlightDetails(Airline airline, Flight flight)
         }
         else if (modifyOption == "4")
         {
+            //check if flight is already assigned to a boarding gate
+            BoardingGate? currentFlightGate = null;
+            foreach (var bGate in boardingGateDict.Values)
+            {
+                if (bGate.Flight == flight)
+                {
+                    currentFlightGate = bGate;
+                    break;
+                }
+            }
+            if (currentFlightGate == null) throw new InvalidOperationException("Flight is not assigned to any boarding gate.");
             //get new boarding gate
             Console.Write("Enter new Boarding Gate: ");
             string? gateName = Console.ReadLine()?.ToUpper();
             //check if boarding gate input is empty
             if (string.IsNullOrEmpty(gateName)) throw new FormatException("Boarding Gate cannot be empty.");
             //variable to hold current boarding gate if found  
-            BoardingGate? currentGate = null;
+            BoardingGate? newGate = null;
             //iterate through boarding gate dictionary to find matching gate
             foreach (var bGate in boardingGateDict.Values)
             {
@@ -642,7 +653,7 @@ void ModifyFlightDetails(Airline airline, Flight flight)
                     if (bGate.Flight == null)
                     {
                         //assign matching gate to currentGate variable
-                        currentGate = bGate;
+                        newGate = bGate;
                         break;
                     }
                     //error handling for gate already assigned to another flight
@@ -653,20 +664,12 @@ void ModifyFlightDetails(Airline airline, Flight flight)
                 }
             }
             //assign flight to new gate if gate is found
-            if (currentGate != null)
+            if (newGate != null)
             {
-                //iterate through boarding gate dictionary to find gate currently assigned to the flight
-                foreach (var bGate in boardingGateDict.Values)
-                {
-                    if (bGate.Flight == flight)
-                    {
-                        //remove flight from current gate
-                        bGate.Flight = null;
-                        break;
-                    }
-                }
-                //assign flight to new boarding gate
-                currentGate.Flight = flight;
+                //remove flight from current gate
+                currentFlightGate.Flight = null;
+                //assign flight to new gate
+                newGate.Flight = flight;
                 //set flag to true
                 isUpdated = true;
             }
@@ -1039,6 +1042,8 @@ void CalculateDailyFees(Dictionary<string, Airline> airlineDict, Dictionary<stri
             Console.WriteLine("Cannot calculate fees. Please ensure all flights are assigned to boarding gates.");
             return;
         }
+        //get current date
+        DateTime currentDate = DateTime.Now;
         //initialize total terminal fees and discounts
         double totalTerminalFees = 0;
         double totalTerminalDiscounts = 0;
@@ -1053,6 +1058,13 @@ void CalculateDailyFees(Dictionary<string, Airline> airlineDict, Dictionary<stri
             //iterate through flights to calculate fees and discounts
             foreach (var flight in airline.Flights.Values)
             {
+                //check if flight is scheduled for the current date
+                if (flight.ExpectedTime.Date != currentDate.Date)
+                {
+                    //skip flights scheduled for other dates
+                    continue;
+                }
+                Console.WriteLine(flight);
                 //initialize eligible flight discounts
                 int eligibleFlightDiscounts = 0;
                 //calculate flight fees

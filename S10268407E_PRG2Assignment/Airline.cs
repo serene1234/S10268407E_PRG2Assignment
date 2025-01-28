@@ -53,7 +53,7 @@ namespace S10268407E_PRG2Assignment
         }
         public override string ToString()
         {
-            return "Airline: " + Name + "\tCode: " + Code + "\tFlights: " + Flights.Count;
+            return ($"{Code,-16}{Name,-18}");
         }
     }
 }
