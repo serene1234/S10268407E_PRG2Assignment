@@ -1077,11 +1077,25 @@ void CalculateDailyFees(Dictionary<string, Airline> airlineDict, Dictionary<stri
                     //skip flights scheduled for other dates
                     continue;
                 }
-                Console.WriteLine(flight);
                 //initialize eligible flight discounts
                 int eligibleFlightDiscounts = 0;
                 //calculate flight fees
                 double flightFee = flight.CalculateFees();
+                //get assigned boarding gate for flight
+                BoardingGate assignedGate = null;
+                foreach (var bGate in boardingGateDict.Values)
+                {
+                    if (bGate.Flight == flight)
+                    {
+                        assignedGate = bGate;
+                        break;
+                    }
+                }
+                if (assignedGate != null)
+                {
+                    //apply boarding gate base fees
+                    flightFee += assignedGate.CalculateFees();
+                }
                 airlineSubtotal += flightFee;
                 //apply discounts for origin
                 if (flight.Origin == "Dubai (DXB)" || flight.Origin == "Bangkok (BKK)" || flight.Origin == "Tokyo (NRT)")

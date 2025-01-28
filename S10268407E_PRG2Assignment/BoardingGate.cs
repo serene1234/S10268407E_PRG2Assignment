@@ -29,7 +29,8 @@ namespace S10268407E_PRG2Assignment
         }
         public double CalculateFees() 
         {
-            return 0;
+            //base fee of 300
+            return 300;
         }
         public override string ToString()
         {
