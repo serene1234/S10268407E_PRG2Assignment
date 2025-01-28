@@ -563,15 +563,30 @@ void ModifyFlightDetails(Airline airline, Flight flight)
             //get new expected time
             Console.Write("Enter new Expected Departure/Arrival Time (dd/mm/yyyy hh:mm): ");
             string? time = Console.ReadLine();
-            DateTime expectedTime;
-            if (string.IsNullOrEmpty(time)) throw new FormatException("Expected time cannot be empty.");
-            else expectedTime = DateTime.Parse(time);
-            //update flight details
-            flight.Origin = origin;
-            flight.Destination = destination;
-            flight.ExpectedTime = expectedTime;
-            //set flag to true
-            isUpdated = true;
+            //validate expected time input
+            try
+            {
+                DateTime expectedTime = DateTime.Parse(time);
+                //check if expected time is in the past
+                if (expectedTime < DateTime.Now)
+                {
+                    throw new ArgumentException("Expected time cannot be in the past.");
+                }
+                //update flight details
+                flight.Origin = origin;
+                flight.Destination = destination;
+                flight.ExpectedTime = expectedTime;
+                //set flag to true
+                isUpdated = true;
+            }
+            catch (FormatException)
+            {
+                throw new FormatException("Invalid date format!");
+            }
+            catch (ArgumentException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
         }
         else if (modifyOption == "2")
@@ -1042,8 +1057,6 @@ void CalculateDailyFees(Dictionary<string, Airline> airlineDict, Dictionary<stri
             Console.WriteLine("Cannot calculate fees. Please ensure all flights are assigned to boarding gates.");
             return;
         }
-        //get current date
-        DateTime currentDate = DateTime.Now;
         //initialize total terminal fees and discounts
         double totalTerminalFees = 0;
         double totalTerminalDiscounts = 0;
@@ -1059,7 +1072,7 @@ void CalculateDailyFees(Dictionary<string, Airline> airlineDict, Dictionary<stri
             foreach (var flight in airline.Flights.Values)
             {
                 //check if flight is scheduled for the current date
-                if (flight.ExpectedTime.Date != currentDate.Date)
+                if (flight.ExpectedTime.Date != DateTime.Today)
                 {
                     //skip flights scheduled for other dates
                     continue;
