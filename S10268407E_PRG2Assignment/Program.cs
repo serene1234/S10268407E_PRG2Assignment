@@ -165,7 +165,7 @@ void ListAllFlights(Terminal terminal)
     Console.WriteLine("=============================================");
 
     //define column headers with precise spacing for alignment
-    Console.WriteLine($"{"Flight No",-12} {"Airline Name",-20} {"Origin",-20} {"Destination",-20} " +
+    Console.WriteLine($"{"Flight Number",-15} {"Airline Name",-20} {"Origin",-20} {"Destination",-20} " +
                    $"{"Expected Departure/Arrival Time",-25}");
 
     //sort all flights by expected time for chronological display
@@ -187,7 +187,7 @@ void ListAllFlights(Terminal terminal)
 
         //format each line with consistent column spacing
         //using DateTime format "dd/M/yyyy h:mm:ss tt" as per requirements
-        Console.WriteLine($"{flight.FlightNumber,-12} {airlineName,-20} " +
+        Console.WriteLine($"{flight.FlightNumber,-15} {airlineName,-20} " +
                  $"{flight.Origin,-20} {flight.Destination,-20} " +
                  $"{flight.ExpectedTime:dd/M/yyyy h:mm:ss tt}");
     }
@@ -221,96 +221,99 @@ void AssignBoardingGate(Terminal terminal)
     Console.WriteLine("Assign a Boarding Gate to a Flight");
     Console.WriteLine("=============================================");
 
-    while (true)
+    //get flight number input
+    Console.Write("Enter Flight Number: ");
+    string? flightNo = Console.ReadLine();
+
+    //check if flight number exists in dictionary
+    if (string.IsNullOrEmpty(flightNo) || !terminal.Flights.ContainsKey(flightNo))
     {
-        //get and validate flight number input
-        Console.WriteLine("Enter Flight Number:");
-        string? flightNo = Console.ReadLine();
-
-        //check if flight number exists in dictionary
-        if (string.IsNullOrEmpty(flightNo) || !terminal.Flights.ContainsKey(flightNo))
-        {
-            Console.WriteLine("Invalid Flight Number! Please try again.");
-            continue;
-        }
-
-        //get flight object and display current details
-        Flight flight = terminal.Flights[flightNo];
-        DisplayFlightDetails(terminal, flightNo);
-
-        //check if flight already has a gate assignment
-        bool isAssigned = false;
-        foreach (BoardingGate bGate in terminal.BoardingGates.Values)
-        {
-            if (bGate.Flight != null && bGate.Flight.FlightNumber == flightNo)
-            {
-                Console.WriteLine($"Flight {flightNo} is already assigned to Boarding Gate {bGate.GateName}.");
-                isAssigned = true;
-                break;
-            }
-        }
-        if (isAssigned) break;
-
-        //get and validate boarding gate input
-        Console.WriteLine("\nEnter Boarding Gate Name:");
-        string? gateName = Console.ReadLine();
-
-        //check if gate exists in dictionary
-        if (string.IsNullOrEmpty(gateName) || !terminal.BoardingGates.ContainsKey(gateName))
-        {
-            Console.WriteLine("Invalid Boarding Gate! Please try again.");
-            continue;
-        }
-
-        BoardingGate gate = terminal.BoardingGates[gateName];
-
-        //check if gate is already assigned to another flight
-        if (gate.Flight != null)
-        {
-            Console.WriteLine($"Boarding Gate {gate.GateName} is already assigned to another flight!");
-            continue;
-        }
-
-        //handle flight status update
-        Console.WriteLine("\nWould you like to update the status of the flight? (Y/N)");
-        string? response = Console.ReadLine()?.ToUpper();
-
-        if (response == "Y")
-        {
-            //display status options menu
-            Console.WriteLine("1. Delayed");
-            Console.WriteLine("2. Boarding");
-            Console.WriteLine("3. On Time");
-            Console.WriteLine("Please select the new status of the flight:");
-
-            //process status choice
-            if (int.TryParse(Console.ReadLine(), out int statusChoice))
-            {
-                switch (statusChoice)
-                {
-                    case 1:
-                        flight.Status = "Delayed";
-                        break;
-                    case 2:
-                        flight.Status = "Boarding";
-                        break;
-                    default:
-                        flight.Status = "On Time";
-                        break;
-                }
-            }
-        }
-        else
-        {
-            //default status if no update requested
-            flight.Status = "On Time";
-        }
-
-        //assign gate and display confirmation
-        gate.Flight = flight;
-        Console.WriteLine($"\nFlight {flightNo} has been assigned to Boarding Gate {gateName}!");
-        break;
+        Console.WriteLine("Invalid Flight Number!");
+        return;
     }
+
+    //get flight object
+    Flight flight = terminal.Flights[flightNo];
+
+    //get airline name
+    string airlineCode = flightNo.Split(' ')[0];
+    string airlineName = terminal.Airlines.ContainsKey(airlineCode) ? terminal.Airlines[airlineCode].Name : "Unknown";
+
+    //get special request and gate status
+    string specialRequest = flight switch
+    {
+        DDJBFlight => "DDJB",
+        CFFTFlight => "CFFT",
+        LWTTFlight => "LWTT",
+        _ => "None"
+    };
+
+    //get boarding gate input
+    Console.Write("Enter Boarding Gate Name: ");
+    string? gateName = Console.ReadLine();
+
+    //validate boarding gate
+    if (string.IsNullOrEmpty(gateName) || !terminal.BoardingGates.ContainsKey(gateName))
+    {
+        Console.WriteLine("Invalid Boarding Gate!");
+        return;
+    }
+
+    BoardingGate gate = terminal.BoardingGates[gateName];
+
+    //check if gate is already assigned
+    if (gate.Flight != null)
+    {
+        Console.WriteLine($"Boarding Gate {gateName} is already assigned to another flight!");
+        return;
+    }
+
+    //display gate details
+    Console.WriteLine($"Flight Number: {flightNo}");
+    Console.WriteLine($"Origin: {flight.Origin}");
+    Console.WriteLine($"Destination: {flight.Destination}");
+    Console.WriteLine($"Expected Time: {flight.ExpectedTime:dd/M/yyyy h:mm:ss tt}");
+    Console.WriteLine($"Special Request Code: {specialRequest}");
+    Console.WriteLine($"Boarding Gate Name: {gateName}");
+    Console.WriteLine($"Supports DDJB: {gate.SupportsDDJB}");
+    Console.WriteLine($"Supports CFFT: {gate.SupportsCFFT}");
+    Console.WriteLine($"Supports LWTT: {gate.SupportsLWTT}");
+
+    //handle status update
+    Console.Write("Would you like to update the status of the flight? (Y/N) ");
+    string? response = Console.ReadLine()?.ToUpper();
+
+    if (response == "Y")
+    {
+        Console.WriteLine("1. Delayed");
+        Console.WriteLine("2. Boarding");
+        Console.WriteLine("3. On Time");
+        Console.Write("Please select the new status of the flight: ");
+
+        if (int.TryParse(Console.ReadLine(), out int statusChoice))
+        {
+            switch (statusChoice)
+            {
+                case 1:
+                    flight.Status = "Delayed";
+                    break;
+                case 2:
+                    flight.Status = "Boarding";
+                    break;
+                case 3:
+                    flight.Status = "On Time";
+                    break;
+            }
+        }
+    }
+    else
+    {
+        flight.Status = "On Time";
+    }
+
+    //assign gate and display confirmation
+    gate.Flight = flight;
+    Console.WriteLine($"\nFlight {flightNo} has been assigned to Boarding Gate {gateName}!");
 }
 
 //Feature 6
@@ -909,7 +912,7 @@ void DisplayFlightSchedule(Terminal terminal)
     Console.WriteLine("=============================================");
 
     //column headers matching sample output format exactly
-    Console.WriteLine($"{"Flight No",-12} {"Airline",-20} {"Origin",-20} {"Destination",-20} " +
+    Console.WriteLine($"{"Flight Number",-15} {"Airline",-20} {"Origin",-20} {"Destination",-20} " +
                      $"{"Expected Time",-20} {"Status",-12} {"Gate"}");
 
     //sort flights chronologically using IComparable implementation
@@ -937,7 +940,7 @@ void DisplayFlightSchedule(Terminal terminal)
 
         //display flight info in required format
         string formattedTime = flight.ExpectedTime.ToString("dd/M/yyyy h:mm:ss tt");
-        Console.WriteLine($"{flight.FlightNumber,-12} {airlineName,-20} " +
+        Console.WriteLine($"{flight.FlightNumber,-15} {airlineName,-20} " +
                        $"{flight.Origin,-20} {flight.Destination,-20} " +
                        $"{formattedTime,-20} {flight.Status,-12} {gateAssignment}");
     }
