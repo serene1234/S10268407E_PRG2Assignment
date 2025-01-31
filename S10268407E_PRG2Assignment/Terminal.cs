@@ -27,15 +27,15 @@ namespace S10268407E_PRG2Assignment
             BoardingGates = new Dictionary<string, BoardingGate>();
             GateFees = new Dictionary<string, double>();
         }
-        public bool AddAirLine(Airline airline)
+        public bool AddAirline(Airline airline)
         {
-            if (Airlines.ContainsKey(airline.Name))
+            if (Airlines.ContainsKey(airline.Code))
             {
                 return false;
             }
             else
             {
-                Airlines.Add(airline.Name, airline);
+                Airlines.Add(airline.Code, airline);
                 return true;
             }
         }
