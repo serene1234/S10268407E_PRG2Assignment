@@ -505,6 +505,41 @@ void DisplayFlightDetails(Terminal terminal, string flightNo)
         Console.WriteLine(ex.Message);
     }
 }
+void HandleDisplayAirlineFlights (Terminal terminal)
+{
+    DisplayAllAirlines(terminal);
+    Console.Write("Enter Airline Code: ");
+    string? code = Console.ReadLine()?.ToUpper();
+    //check if code is empty or not 2 characters
+    if (string.IsNullOrEmpty(code) || code.Length != 2)
+    {
+        throw new FormatException("Invalid Airline Code! The code must be exactly 2 characters.");
+    }
+    //check if airline code exists
+    if (!terminal.Airlines.ContainsKey(code))
+    {
+        throw new KeyNotFoundException("Airline Code not found!");
+    }
+    //display airline flights
+    Airline? airline = DisplayAirlineFlights(terminal, code);
+
+    Console.Write("Enter Flight Number: ");
+    string? flightNo = Console.ReadLine()?.ToUpper();
+    if (string.IsNullOrEmpty(flightNo))
+    {
+        throw new FormatException("Invalid Flight Number! The number cannot be empty.");
+    }
+    //search for flight in alirline's flight 
+    Flight? selectedFlight = SearchFlight(terminal, flightNo);
+    if (selectedFlight != null && airline.Flights.ContainsKey(selectedFlight.FlightNumber))
+    {
+        DisplayFlightDetails(terminal, flightNo);
+    }
+    else
+    {
+        throw new KeyNotFoundException("Flight Number not found in airline's flights.");
+    }
+}
 
 //Feature 8
 //method to update flight details
@@ -822,6 +857,49 @@ void DeleteFlight(Terminal terminal, Flight flight)
         Console.WriteLine($"Unexpected error: {ex.Message}");
     }
 }
+void HandleModifyOrDeleteFlight(Terminal terminal)
+{
+    DisplayAllAirlines(terminal);
+    Console.Write("Enter Airline Code: ");
+    string? code = Console.ReadLine()?.ToUpper();
+    //check if code is empty or not 2 characters
+    if (string.IsNullOrEmpty(code) || code.Length != 2)
+    {
+        throw new FormatException("Invalid Airline Code! The code must be exactly 2 characters.");
+    }
+    if (!terminal.Airlines.ContainsKey(code))
+    {
+        throw new KeyNotFoundException("Airline Code not found!");
+    }
+    Airline airline = DisplayAirlineFlights(terminal, code);
+    Console.Write("Choose an existing Flight to modify or delete: ");
+    string? flightNo = Console.ReadLine()?.ToUpper();
+    if (string.IsNullOrEmpty(flightNo))
+    {
+        throw new FormatException("Invalid Flight Number! The number cannot be empty.");
+    }
+    if (!airline.Flights.ContainsKey(flightNo))
+    {
+        throw new KeyNotFoundException("Flight Number not found in airline's flights.");
+    }
+    Flight flight = airline.Flights[flightNo];
+    Console.WriteLine("1. Modify Flight");
+    Console.WriteLine("2. Delete Flight");
+    Console.Write("Choose an option: ");
+    string? modifyOption = Console.ReadLine();
+    if (modifyOption == "1")
+    {
+        ModifyFlightDetails(terminal, flight);
+    }
+    else if (modifyOption == "2")
+    {
+        DeleteFlight(terminal, flight);
+    }
+    else
+    {
+        throw new InvalidOperationException("Invalid option! Please choose option between 1-2.");
+    }
+}
 
 //Feature 9
 void DisplayFlightSchedule(Terminal terminal)
@@ -1027,90 +1105,7 @@ void CalculateDailyFees(Terminal terminal)
             Console.WriteLine("Cannot calculate fees. Please ensure all flights are assigned to boarding gates.");
             return;
         }
-        //initialize total terminal fees and discounts
-        double totalTerminalFees = 0;
-        double totalTerminalDiscounts = 0;
-        //iterate through airlines to calculate fees and discounts
-        foreach (var airline in terminal.Airlines.Values)
-        {
-            //initialize airline subtotal and discounts
-            double airlineSubtotal = 0;
-            double airlineDiscounts = 0;
-            //count number of flights for airline
-            int flightCount = airline.Flights.Count;
-            //iterate through flights to calculate fees and discounts
-            foreach (var flight in airline.Flights.Values)
-            {
-                //check if flight is scheduled for the current date
-                if (flight.ExpectedTime.Date != DateTime.Today)
-                {
-                    //skip flights scheduled for other dates
-                    continue;
-                }
-                //initialize eligible flight discounts
-                int eligibleFlightDiscounts = 0;
-                //calculate flight fees
-                double flightFee = flight.CalculateFees();
-                //get assigned boarding gate for flight
-                BoardingGate assignedGate = null;
-                foreach (var bGate in terminal.BoardingGates.Values)
-                {
-                    if (bGate.Flight == flight)
-                    {
-                        assignedGate = bGate;
-                        break;
-                    }
-                }
-                if (assignedGate != null)
-                {
-                    //apply boarding gate base fees
-                    flightFee += assignedGate.CalculateFees();
-                }
-                airlineSubtotal += flightFee;
-                //apply discounts for origin
-                if (flight.Origin == "Dubai (DXB)" || flight.Origin == "Bangkok (BKK)" || flight.Origin == "Tokyo (NRT)")
-                {
-                    eligibleFlightDiscounts += 25;
-                }
-                //apply discounts for no special request
-                if (flight is NORMFlight)
-                {
-                    eligibleFlightDiscounts += 50;
-                }
-                //apply discounts for expected time within discounted range
-                if (flight.ExpectedTime.Hour < 11 || flight.ExpectedTime.Hour > 21)
-                {
-                    eligibleFlightDiscounts += 110;
-                }
-                //add eligible flight discounts to airline's total discounts
-                airlineDiscounts += eligibleFlightDiscounts;
-            }
-            //apply discounts for every 3 flights
-            airlineDiscounts += (flightCount / 3) * 350;
-            //apply discounts for airlines with more than 5 flights
-            if (flightCount > 5)
-            {
-                //apply 3% discount
-                airlineSubtotal *= 0.97;
-            }
-            //calculate final total fees for the airline after disocunts
-            double airlineFinalTotal = airlineSubtotal - airlineDiscounts;
-            //update total terminal fees and discounts
-            totalTerminalFees += airlineSubtotal;
-            totalTerminalDiscounts += airlineDiscounts;
-            //display fees and discounts per airline
-            Console.WriteLine($"Airline: {airline.Name}");
-            Console.WriteLine($"Subtotal Fees: {airlineSubtotal:C2}");
-            Console.WriteLine($"Discounts Applied: -{airlineDiscounts:C2}");
-            Console.WriteLine($"Final Amount Charged: {airlineFinalTotal:C2}");
-            Console.WriteLine();
-        }
-        //display total Terminal 5 revenue and discounts
-        Console.WriteLine("========== Terminal 5 Summary ==========");
-        Console.WriteLine($"Total Fees Before Discounts: {totalTerminalFees:C2}");
-        Console.WriteLine($"Total Discounts Applied: -{totalTerminalDiscounts:C2}");
-        Console.WriteLine($"Final Fees Terminal 5 Will Collect: {totalTerminalFees - totalTerminalDiscounts:C2}");
-        Console.WriteLine($"Discount Percentage: {((totalTerminalDiscounts / totalTerminalFees) * 100):F2}%");
+        terminal.PrintAirlineFees();
     }
     //general exception handling
     catch (Exception ex)
@@ -1184,90 +1179,13 @@ while (true)
         {
             CreateNewFlight(terminal);  //Feature 6
         }
-        else if (option == "5") //Feature 7
+        else if (option == "5")
         {
-            DisplayAllAirlines(terminal);
-            Console.Write("Enter Airline Code: ");
-            string? code = Console.ReadLine()?.ToUpper();
-            //check if code is empty or not 2 characters
-            if (string.IsNullOrEmpty(code) || code.Length != 2)
-            {
-                throw new FormatException("Invalid Airline Code! The code must be exactly 2 characters.");
-            }
-            //check if airline code exists
-            if (!terminal.Airlines.ContainsKey(code))
-            {
-                throw new KeyNotFoundException("Airline Code not found!");
-            }
-            //display airline flights
-            Airline? airline = DisplayAirlineFlights(terminal, code);
-
-            Console.Write("Enter Flight Number: ");
-            string? flightNo = Console.ReadLine()?.ToUpper();
-            if (string.IsNullOrEmpty(flightNo))
-            {
-                throw new FormatException("Invalid Flight Number! The number cannot be empty.");
-            }
-            //search for flight in alirline's flight 
-            Flight? selectedFlight = SearchFlight(terminal, flightNo);
-            if (selectedFlight != null && airline.Flights.ContainsKey(selectedFlight.FlightNumber))
-            {
-                DisplayFlightDetails(terminal, flightNo);
-            }
-            else
-            {
-                throw new KeyNotFoundException("Flight Number not found in airline's flights.");
-            }
-
+            HandleDisplayAirlineFlights(terminal); //Feature 7
         }
-        else if (option == "6") //Feature 8
+        else if (option == "6")
         {
-            DisplayAllAirlines(terminal);
-            Console.Write("Enter Airline Code: ");
-            string? code = Console.ReadLine()?.ToUpper();
-            //check if code is empty or not 2 characters
-            if (string.IsNullOrEmpty(code) || code.Length != 2)
-            {
-                throw new FormatException("Invalid Airline Code! The code must be exactly 2 characters.");
-            }
-            if (terminal.Airlines.ContainsKey(code))
-            {
-                Airline airline = DisplayAirlineFlights(terminal, code);
-                Console.Write("Choose an existing Flight to modify or delete: ");
-                string? flightNo = Console.ReadLine()?.ToUpper();
-                if (string.IsNullOrEmpty(flightNo))
-                {
-                    throw new FormatException("Invalid Flight Number! The number cannot be empty.");
-                }
-                if (airline.Flights.ContainsKey(flightNo))
-                {
-                    Flight flight = airline.Flights[flightNo];
-                    Console.WriteLine("1. Modify Flight");
-                    Console.WriteLine("2. Delete Flight");
-                    Console.Write("Choose an option: ");
-                    string? modifyOption = Console.ReadLine();
-                    if (modifyOption == "1")
-                    {
-                        ModifyFlightDetails(terminal, flight);
-                    }
-                    else if (modifyOption == "2")
-                    {
-                        DeleteFlight(terminal, flight);
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException("Invalid option! Please try again.");
-                    }
-                }
-                else
-                {
-                    throw new KeyNotFoundException("Invalid Flight Number!");
-                }
-            }
-            else
-            {
-                throw new KeyNotFoundException("Invalid Airline Code!");
-            }
+            HandleModifyOrDeleteFlight(terminal); //Feature 8
         }
         else if (option == "7")
         {

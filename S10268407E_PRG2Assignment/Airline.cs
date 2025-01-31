@@ -38,7 +38,25 @@ namespace S10268407E_PRG2Assignment
             double totalFees = 0;
             foreach (var flight in Flights.Values)
             {
-                totalFees += flight.CalculateFees();
+                if (flight is NORMFlight)
+                {
+                    totalFees += flight.CalculateFees();
+                }
+                else if  (flight is CFFTFlight)
+                {
+                    CFFTFlight cFFTFlight = (CFFTFlight)flight;
+                    totalFees += cFFTFlight.CalculateFees();
+                }
+                else if (flight is DDJBFlight)
+                {
+                    DDJBFlight dDJBFlight = (DDJBFlight)flight;
+                    totalFees += dDJBFlight.CalculateFees();
+                }
+                else if (flight is LWTTFlight)
+                {
+                    LWTTFlight lWTTFlight = (LWTTFlight)flight;
+                    totalFees += lWTTFlight.CalculateFees();
+                }
             }
             return totalFees;
         }
