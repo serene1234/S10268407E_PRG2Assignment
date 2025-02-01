@@ -14,11 +14,13 @@ namespace S10268407E_PRG2Assignment
 {
     class BoardingGate
     {
+        //properties
         public string GateName { get; set; }
         public bool SupportsCFFT { get; set; }
         public bool SupportsDDJB { get; set; }
         public bool SupportsLWTT { get; set; }
         public Flight Flight { get; set; }
+        //constructor
         public BoardingGate() { }
         public BoardingGate(string gateName, bool supportsDDJB, bool supportsCFFT, bool supportsLWTT)
         {
@@ -27,6 +29,7 @@ namespace S10268407E_PRG2Assignment
             SupportsCFFT = supportsCFFT;
             SupportsLWTT = supportsLWTT;
         }
+        //methods
         public double CalculateFees() 
         {
             //base fee of 300

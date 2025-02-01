@@ -204,10 +204,12 @@ void DisplayAllBoardingGates(Terminal terminal)
     {
         if (bGate.Flight != null)
         {
+            //display flight number if gate is assigned
             Console.WriteLine($"{ bGate.ToString()}{bGate.Flight.FlightNumber}");
         }
         else
         {
+            //display unassigned if gate is not assigned
             Console.WriteLine($"{bGate.ToString()}{"Unassigned",-13}");
         }
     }
@@ -416,11 +418,11 @@ Airline DisplayAirlineFlights(Terminal terminal, string code)
     //get airline object
     Airline airline = terminal.Airlines[code];
     Console.WriteLine($"=============================================\r\nList of Flights for {airline.Name}\r\n=============================================");
-    Console.WriteLine($"{"Airline Number",-16}{"Origin",-18}{"Destination",-18}");
+    Console.WriteLine($"{"Airline Number",-16}{"Origin",-18}{"Destination",-18}{"Expected Departure/Arrival Time",-34}");
     //iterate through airline's flights and display details
     foreach (var flight in airline.Flights.Values)
     {
-        Console.WriteLine($"{flight.FlightNumber,-16}{flight.Origin,-18}{flight.Destination,-18}");
+        Console.WriteLine($"{flight.FlightNumber,-16}{flight.Origin,-18}{flight.Destination,-18}{flight.ExpectedTime,-34}");
     }
     //return airline object
     return airline;
@@ -436,8 +438,8 @@ Flight SearchFlight(Terminal terminal, string flightNo)
     }
     else
     {
+        //return null if flight number not found
         return null;
-
     }
 }
 //method to display flight details
@@ -448,6 +450,7 @@ void DisplayFlightDetails(Terminal terminal, string flightNo)
         Console.WriteLine($"=============================================\r\nFull Flight Details for {flightNo}\r\n=============================================");
         //call search() method to search for the flight
         Flight? foundFlight = SearchFlight(terminal, flightNo);
+        //display flight details if flight is found
         if (foundFlight != null)
         {
             //get airline object from flight object
@@ -508,8 +511,10 @@ void DisplayFlightDetails(Terminal terminal, string flightNo)
         Console.WriteLine(ex.Message);
     }
 }
+//method to display all flights for a specific airline
 void HandleDisplayAirlineFlights (Terminal terminal)
 {
+    //display all airlines
     DisplayAllAirlines(terminal);
     Console.Write("Enter Airline Code: ");
     string? code = Console.ReadLine()?.ToUpper();
@@ -528,16 +533,19 @@ void HandleDisplayAirlineFlights (Terminal terminal)
 
     Console.Write("Enter Flight Number: ");
     string? flightNo = Console.ReadLine()?.ToUpper();
+    //check if flight number is empty
     if (string.IsNullOrEmpty(flightNo))
     {
         throw new FormatException("Invalid Flight Number! The number cannot be empty.");
     }
     //search for flight in alirline's flight 
     Flight? selectedFlight = SearchFlight(terminal, flightNo);
+    //display flight details if flight is found
     if (selectedFlight != null && airline.Flights.ContainsKey(selectedFlight.FlightNumber))
     {
         DisplayFlightDetails(terminal, flightNo);
     }
+    //error handling for flight number not found in airline's flights
     else
     {
         throw new KeyNotFoundException("Flight Number not found in airline's flights.");
@@ -552,8 +560,9 @@ void ModifyFlightDetails(Terminal terminal, Flight flight)
     Console.WriteLine("2. Modify Status");
     Console.WriteLine("3. Modify Special Request Code");
     Console.WriteLine("4. Modify Boarding Gate");
-    Console.WriteLine("Choose an option:");
+    Console.Write("Choose an option: ");
     string? modifyOption = Console.ReadLine();
+    //check if modify option is empty
     if (string.IsNullOrEmpty(modifyOption))
     {
         Console.WriteLine("Invalid option! Please choose option between 1-4.");
@@ -608,11 +617,30 @@ void ModifyFlightDetails(Terminal terminal, Flight flight)
         }
         else if (modifyOption == "2")
         {
-            //get new status
-            Console.Write("Enter new Status: ");
+            //display status options
+            Console.WriteLine("1. Delayed");
+            Console.WriteLine("2. Boarding");
+            Console.WriteLine("3. On Time");
+            Console.Write("Please select the new status of the flight: ");
             string? status = Console.ReadLine();
-            //check if status input is empty
-            if (string.IsNullOrEmpty(status)) throw new FormatException("Status cannot be empty.");
+            //check if status input option is empty or invalid
+            if (string.IsNullOrEmpty(status) || (status != "1" && status != "2" && status != "3"))
+            {
+                throw new FormatException("Invalid option! Please choose option between 1-3.");
+            }
+            //update status based on user input
+            else if (status == "1")
+            {
+                status = "Delayed";
+            }
+            else if (status == "2")
+            {
+                status = "Boarding";
+            }
+            else
+            {
+                status = "On Time";
+            }
             //update flight status
             flight.Status = status;
             //set flag to true
@@ -648,10 +676,20 @@ void ModifyFlightDetails(Terminal terminal, Flight flight)
             {
                 newFlight = new NORMFlight(flight.FlightNumber, flight.Origin, flight.Destination, flight.ExpectedTime);
             }
-            //replace flight in airline dictionary
             airline.Flights[flight.FlightNumber] = newFlight;
+            //remove old flight from flight dictionary
             terminal.Flights.Remove(flight.FlightNumber);
+            //add new flight to flight dictionary
             terminal.Flights.Add(newFlight.FlightNumber, newFlight);
+            //update flight's boarding gate if assigned
+            foreach (var bGate in terminal.BoardingGates.Values)
+            {
+                if (bGate.Flight != null && bGate.Flight.FlightNumber == flight.FlightNumber)
+                {
+                    bGate.Flight = newFlight;
+                    break;
+                }
+            }
             //set flag to true
             isUpdated = true;
         }
@@ -663,17 +701,19 @@ void ModifyFlightDetails(Terminal terminal, Flight flight)
             {
                 if (bGate.Flight == flight)
                 {
+                    //assign current boarding gate to variable
                     currentFlightGate = bGate;
                     break;
                 }
             }
+            //error handling for flight not assigned to any boarding gate
             if (currentFlightGate == null) throw new InvalidOperationException("Flight is not assigned to any boarding gate.");
             //get new boarding gate
             Console.Write("Enter new Boarding Gate: ");
             string? gateName = Console.ReadLine()?.ToUpper();
             //check if boarding gate input is empty
             if (string.IsNullOrEmpty(gateName)) throw new FormatException("Boarding Gate cannot be empty.");
-            //variable to hold current boarding gate if found  
+            //check if boarding gate is valid
             BoardingGate? newGate = null;
             //iterate through boarding gate dictionary to find matching gate
             foreach (var bGate in terminal.BoardingGates.Values)
@@ -860,6 +900,7 @@ void DeleteFlight(Terminal terminal, Flight flight)
         Console.WriteLine($"Unexpected error: {ex.Message}");
     }
 }
+//method to handle modify or delete flight
 void HandleModifyOrDeleteFlight(Terminal terminal)
 {
     DisplayAllAirlines(terminal);
@@ -870,26 +911,38 @@ void HandleModifyOrDeleteFlight(Terminal terminal)
     {
         throw new FormatException("Invalid Airline Code! The code must be exactly 2 characters.");
     }
+    //check if airline code exists
     if (!terminal.Airlines.ContainsKey(code))
     {
         throw new KeyNotFoundException("Airline Code not found!");
     }
+    //display airline flights
     Airline airline = DisplayAirlineFlights(terminal, code);
     Console.Write("Choose an existing Flight to modify or delete: ");
     string? flightNo = Console.ReadLine()?.ToUpper();
+    //check if flight number is empty
     if (string.IsNullOrEmpty(flightNo))
     {
         throw new FormatException("Invalid Flight Number! The number cannot be empty.");
     }
+    //check if flight number exists in airline's flights
     if (!airline.Flights.ContainsKey(flightNo))
     {
         throw new KeyNotFoundException("Flight Number not found in airline's flights.");
     }
+    //get flight object
     Flight flight = airline.Flights[flightNo];
     Console.WriteLine("1. Modify Flight");
     Console.WriteLine("2. Delete Flight");
     Console.Write("Choose an option: ");
     string? modifyOption = Console.ReadLine();
+    //check if modify option is empty
+    if (string.IsNullOrEmpty(modifyOption))
+    {
+        Console.WriteLine("Invalid option! Please choose option between 1-2.");
+        return;
+    }
+    //process modify or delete based on user input
     if (modifyOption == "1")
     {
         ModifyFlightDetails(terminal, flight);
@@ -898,6 +951,7 @@ void HandleModifyOrDeleteFlight(Terminal terminal)
     {
         DeleteFlight(terminal, flight);
     }
+    //error handling for invalid modify option
     else
     {
         throw new InvalidOperationException("Invalid option! Please choose option between 1-2.");
@@ -1108,6 +1162,7 @@ void CalculateDailyFees(Terminal terminal)
             Console.WriteLine("Cannot calculate fees. Please ensure all flights are assigned to boarding gates.");
             return;
         }
+        //calculate total fees per airline
         terminal.PrintAirlineFees();
     }
     //general exception handling

@@ -14,11 +14,13 @@ namespace S10268407E_PRG2Assignment
 {
     class Terminal
     {
+        //properties
         public string TerminalName { get; set; }
         public Dictionary<string, Airline> Airlines { get; set; }
         public Dictionary<string, Flight> Flights { get; set; }
         public Dictionary<string, BoardingGate> BoardingGates { get; set; }
         public Dictionary<string, double> GateFees { get; set; }
+        //constructor
         public Terminal(string tName)
         {
             TerminalName = tName;
@@ -27,12 +29,15 @@ namespace S10268407E_PRG2Assignment
             BoardingGates = new Dictionary<string, BoardingGate>();
             GateFees = new Dictionary<string, double>();
         }
+        //methods
         public bool AddAirline(Airline airline)
         {
+            //check if airline code already exists
             if (Airlines.ContainsKey(airline.Code))
             {
                 return false;
             }
+            //add airline if code does not exist
             else
             {
                 Airlines.Add(airline.Code, airline);
@@ -41,10 +46,12 @@ namespace S10268407E_PRG2Assignment
         }
         public bool AddBoardingGate(BoardingGate boardingGate)
         {
+            //check if boarding gate name already exists
             if (BoardingGates.ContainsKey(boardingGate.GateName))
             {
                 return false;
             }
+            //add boarding gate if name does not exist
             else
             {
                 BoardingGates.Add(boardingGate.GateName, boardingGate);
@@ -53,13 +60,17 @@ namespace S10268407E_PRG2Assignment
         }
         public Airline GetAirlineFromFlight(Flight flight)
         {
+            //iterate through airlines to find airline with flight
             foreach (var airline in Airlines.Values)
             {
+                //check if airline contains flight
                 if (airline.Flights.ContainsValue(flight))
                 {
+                    //return airline with flight
                     return airline;
                 }
             }
+            //return null if airline with flight is not found
             return null;
         }
         public void PrintAirlineFees()
