@@ -10,7 +10,7 @@ using System.ComponentModel.Design;
 using System.Diagnostics.Tracing;
 using System.Globalization;
 
-//Feature 1
+//Feature 1 (Serene)
 //method to load data from airlines.csv and add objects to dictionary
 void CreateAirlines(Terminal terminal)
 {
@@ -80,7 +80,7 @@ void CreateBoardingGates(Terminal terminal)
     }
 }
 
-//Feature 2
+//Feature 2 (Shawntrice)
 void CreateFlights(Terminal terminal)
 {
     try
@@ -156,7 +156,7 @@ void CreateFlights(Terminal terminal)
     }
 }
 
-//Feature 3
+//Feature 3 (Shawntrice)
 void ListAllFlights(Terminal terminal)
 {
     //display header with consistent formatting
@@ -193,7 +193,7 @@ void ListAllFlights(Terminal terminal)
     }
 }
 
-//Feature 4
+//Feature 4 (Serene)
 //method to display all boarding gates
 void DisplayAllBoardingGates(Terminal terminal)
 {
@@ -215,7 +215,7 @@ void DisplayAllBoardingGates(Terminal terminal)
     }
 }
 
-//Feature 5
+//Feature 5 (Shawntrice)
 void AssignBoardingGate(Terminal terminal)
 {
     //display feature header
@@ -318,7 +318,7 @@ void AssignBoardingGate(Terminal terminal)
     Console.WriteLine($"\nFlight {flightNo} has been assigned to Boarding Gate {gateName}!");
 }
 
-//Feature 6
+//Feature 6 (Shawntrice)
 void CreateNewFlight(Terminal terminal)
 {
     bool addAnother = true;
@@ -400,7 +400,70 @@ void CreateNewFlight(Terminal terminal)
     }
 }
 
-//Feature 7
+//Feature 7 (Serene)
+//method to display all flights for a specific airline
+void HandleDisplayAirlineFlights(Terminal terminal)
+{
+    try
+    {
+        //display all airlines
+        DisplayAllAirlines(terminal);
+
+        string? code;
+        while (true)
+        {
+            Console.Write("Enter Airline Code: ");
+            code = Console.ReadLine()?.ToUpper();
+            //check if code is empty or not 2 characters
+            if (string.IsNullOrEmpty(code) || code.Length != 2)
+            {
+                Console.WriteLine("Invalid Airline Code! The code must be exactly 2 characters.");
+                continue;
+            }
+            //check if airline code exists
+            if (!terminal.Airlines.ContainsKey(code))
+            {
+                Console.WriteLine("Airline Code not found!");
+                continue;
+            }
+            break;
+        }
+        //display airline flights
+        Airline? airline = DisplayAirlineFlights(terminal, code);
+
+        string? flightNo;
+        while (true)
+        {
+            Console.Write("Enter Flight Number: ");
+            flightNo = Console.ReadLine()?.ToUpper();
+            //check if flight number is empty
+            if (string.IsNullOrEmpty(flightNo))
+            {
+                Console.WriteLine("Invalid Flight Number! The number cannot be empty.");
+                continue;
+            }
+            //search for flight in alirline's flight 
+            Flight? selectedFlight = SearchFlight(terminal, flightNo);
+            //display flight details if flight is found
+            if (selectedFlight != null && airline.Flights.ContainsKey(selectedFlight.FlightNumber))
+            {
+                DisplayFlightDetails(terminal, flightNo);
+                break;
+            }
+            //error handling for flight number not found in airline's flights
+            else
+            {
+                Console.WriteLine("Flight Number not found in airline's flights.");
+                continue;
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Unexpected error: {ex.Message}");
+    }
+
+}
 //method to display all airlines available
 void DisplayAllAirlines(Terminal terminal)
 {
@@ -445,171 +508,129 @@ Flight SearchFlight(Terminal terminal, string flightNo)
 //method to display flight details
 void DisplayFlightDetails(Terminal terminal, string flightNo)
 {
-    try
-    {
-        Console.WriteLine($"=============================================\r\nFull Flight Details for {flightNo}\r\n=============================================");
-        //call search() method to search for the flight
-        Flight? foundFlight = SearchFlight(terminal, flightNo);
-        //display flight details if flight is found
-        if (foundFlight != null)
-        {
-            //get airline object from flight object
-            Airline airline = terminal.GetAirlineFromFlight(foundFlight);
-            //initialise special request and boarding gate variables
-            string? specialRequest = "None";
-            string? boardingGate = "Unassigned";
-            //determine special request type
-            if (foundFlight is DDJBFlight)
-            {
-                specialRequest = "DDJB";
-            }
-            else if (foundFlight is CFFTFlight)
-            {
-                specialRequest = "CFFT";
-            }
-            else if (foundFlight is LWTTFlight)
-            {
-                specialRequest = "LWTT";
-            }
-            //find assigned boarding gate
-            foreach (var bGate in terminal.BoardingGates.Values)
-            {
-                //check if flight is assigned to a boarding gate
-                if (bGate.Flight != null && bGate.Flight.FlightNumber == foundFlight.FlightNumber)
-                {
-                    //assign boarding gate to variable
-                    boardingGate = bGate.GateName;
-                    break;
-                }
-            }
-            //display flight details
-            Console.WriteLine($"{"Flight Number",-16}{"Airline Name",-24}{"Origin",-20}{"Destination",-20}{"Expected Departure/Arrival Time",-34}");
-            Console.WriteLine($"{foundFlight.FlightNumber,-16}{airline.Name,-24}{foundFlight.Origin,-20}{foundFlight.Destination,-20}{foundFlight.ExpectedTime,-34}");
-            Console.WriteLine($"Special Request Code: {specialRequest}");
-            Console.WriteLine($"Boarding Gate: {boardingGate}");
-        }
-        //error handling for invalid flight number
-        else
-        {
-            Console.WriteLine("Flight Number not found!");
-            return;
-        }
-    }
-    //error handling for invalid input
-    catch (FormatException ex)
-    {
-        Console.WriteLine(ex.Message);
-    }
-    //error handling for missing flight number
-    catch (KeyNotFoundException ex)
-    {
-        Console.WriteLine(ex.Message);
-    }
-    //general exception handling
-    catch (Exception ex)
-    {
-        Console.WriteLine(ex.Message);
-    }
-}
-//method to display all flights for a specific airline
-void HandleDisplayAirlineFlights (Terminal terminal)
-{
-    //display all airlines
-    DisplayAllAirlines(terminal);
-    Console.Write("Enter Airline Code: ");
-    string? code = Console.ReadLine()?.ToUpper();
-    //check if code is empty or not 2 characters
-    if (string.IsNullOrEmpty(code) || code.Length != 2)
-    {
-        throw new FormatException("Invalid Airline Code! The code must be exactly 2 characters.");
-    }
-    //check if airline code exists
-    if (!terminal.Airlines.ContainsKey(code))
-    {
-        throw new KeyNotFoundException("Airline Code not found!");
-    }
-    //display airline flights
-    Airline? airline = DisplayAirlineFlights(terminal, code);
-
-    Console.Write("Enter Flight Number: ");
-    string? flightNo = Console.ReadLine()?.ToUpper();
-    //check if flight number is empty
-    if (string.IsNullOrEmpty(flightNo))
-    {
-        throw new FormatException("Invalid Flight Number! The number cannot be empty.");
-    }
-    //search for flight in alirline's flight 
-    Flight? selectedFlight = SearchFlight(terminal, flightNo);
+    Console.WriteLine($"=============================================\r\nFull Flight Details for {flightNo}\r\n=============================================");
+    //call search() method to search for the flight
+    Flight? foundFlight = SearchFlight(terminal, flightNo);
     //display flight details if flight is found
-    if (selectedFlight != null && airline.Flights.ContainsKey(selectedFlight.FlightNumber))
+    if (foundFlight != null)
     {
-        DisplayFlightDetails(terminal, flightNo);
+        //get airline object from flight object
+        Airline airline = terminal.GetAirlineFromFlight(foundFlight);
+        //initialise special request and boarding gate variables
+        string? specialRequest = "None";
+        string? boardingGate = "Unassigned";
+        //determine special request type
+        if (foundFlight is DDJBFlight)
+        {
+            specialRequest = "DDJB";
+        }
+        else if (foundFlight is CFFTFlight)
+        {
+            specialRequest = "CFFT";
+        }
+        else if (foundFlight is LWTTFlight)
+        {
+            specialRequest = "LWTT";
+        }
+        //find assigned boarding gate
+        foreach (var bGate in terminal.BoardingGates.Values)
+        {
+            //check if flight is assigned to a boarding gate
+            if (bGate.Flight != null && bGate.Flight.FlightNumber == foundFlight.FlightNumber)
+            {
+                //assign boarding gate to variable
+                boardingGate = bGate.GateName;
+                break;
+            }
+        }
+        //display flight details
+        Console.WriteLine($"{"Flight Number",-16}{"Airline Name",-24}{"Origin",-20}{"Destination",-20}{"Expected Departure/Arrival Time",-34}");
+        Console.WriteLine($"{foundFlight.FlightNumber,-16}{airline.Name,-24}{foundFlight.Origin,-20}{foundFlight.Destination,-20}{foundFlight.ExpectedTime,-34}");
+        Console.WriteLine($"Special Request Code: {specialRequest}");
+        Console.WriteLine($"Boarding Gate: {boardingGate}");
     }
-    //error handling for flight number not found in airline's flights
+    //error handling for invalid flight number
     else
     {
-        throw new KeyNotFoundException("Flight Number not found in airline's flights.");
+        Console.WriteLine("Flight Number not found!");
+        return;
     }
 }
 
-//Feature 8
+//Feature 8 (Serene)
 //method to handle modify or delete flight
 void HandleModifyOrDeleteFlight(Terminal terminal)
 {
     try
     {
-        DisplayAllAirlines(terminal);
-        Console.Write("Enter Airline Code: ");
-        string? code = Console.ReadLine()?.ToUpper();
-        //check if code is empty or not 2 characters
-        if (string.IsNullOrEmpty(code) || code.Length != 2)
+        while (true)
         {
-            throw new FormatException("Invalid Airline Code! The code must be exactly 2 characters.");
-        }
-        //check if airline code exists
-        if (!terminal.Airlines.ContainsKey(code))
-        {
-            throw new KeyNotFoundException("Airline Code not found!");
-        }
-        //display airline flights
-        Airline airline = DisplayAirlineFlights(terminal, code);
-        Console.Write("Choose an existing Flight to modify or delete: ");
-        string? flightNo = Console.ReadLine()?.ToUpper();
-        //check if flight number is empty
-        if (string.IsNullOrEmpty(flightNo))
-        {
-            throw new FormatException("Invalid Flight Number! The number cannot be empty.");
-        }
-        //check if flight number exists in airline's flights
-        if (!airline.Flights.ContainsKey(flightNo))
-        {
-            throw new KeyNotFoundException("Flight Number not found in airline's flights.");
-        }
-        //get flight object
-        Flight flight = airline.Flights[flightNo];
-        Console.WriteLine("1. Modify Flight");
-        Console.WriteLine("2. Delete Flight");
-        Console.Write("Choose an option: ");
-        string? modifyOption = Console.ReadLine();
-        //check if modify option is empty
-        if (string.IsNullOrEmpty(modifyOption))
-        {
-            throw new FormatException("Invalid option! Option cannot be empty.");
-        }
-        //process modify or delete based on user input
-        if (modifyOption == "1")
-        {
-            ModifyFlightDetails(terminal, flight);
-        }
-        else if (modifyOption == "2")
-        {
-            DeleteFlight(terminal, flight);
-        }
-        //error handling for invalid modify option
-        else
-        {
-            throw new InvalidOperationException("Invalid option! Please choose option between 1-2.");
-        }
+            DisplayAllAirlines(terminal);
+            Console.Write("Enter Airline Code: ");
+            string? code = Console.ReadLine()?.ToUpper();
+            //check if code is empty or not 2 characters
+            if (string.IsNullOrEmpty(code) || code.Length != 2)
+            {
+                Console.WriteLine("Invalid Airline Code! The code must be exactly 2 characters.");
+                continue;
+            }
+            //check if airline code exists
+            if (!terminal.Airlines.ContainsKey(code))
+            {
+                Console.WriteLine("Airline Code not found!");
+                continue;
+            }
+            //display airline flights
+            Airline airline = DisplayAirlineFlights(terminal, code);
+            Console.Write("Choose an existing Flight to modify or delete: ");
+            string? flightNo = Console.ReadLine()?.ToUpper();
+            //check if flight number is empty
+            if (string.IsNullOrEmpty(flightNo))
+            {
+                Console.WriteLine("Invalid Flight Number! The number cannot be empty.");
+                continue;
+            }
+            //check if flight number exists in airline's flights
+            if (!airline.Flights.ContainsKey(flightNo))
+            {
+                Console.WriteLine("Flight Number not found in airline's flights.");
+                continue;
+            }
+            //get flight object
+            Flight flight = airline.Flights[flightNo];
+
+            while (true)
+            {
+                Console.WriteLine("1. Modify Flight");
+                Console.WriteLine("2. Delete Flight");
+                Console.Write("Choose an option: ");
+                string? modifyOption = Console.ReadLine();
+                //check if modify option is empty
+                if (string.IsNullOrEmpty(modifyOption))
+                {
+                    Console.WriteLine("Invalid option! Option cannot be empty.");
+                    continue;
+                }
+                //process modify or delete based on user input
+                if (modifyOption == "1")
+                {
+                    ModifyFlightDetails(terminal, flight);
+                    break;
+                }
+                else if (modifyOption == "2")
+                {
+                    DeleteFlight(terminal, flight);
+                    break;
+                }
+                //error handling for invalid modify option
+                else
+                {
+                    Console.WriteLine("Invalid option! Please choose option between 1-2.");
+                    continue;
+                }
+            }
+            break;
+        }  
     }
     //error handling for invalid input
     catch (FormatException ex)
@@ -635,22 +656,27 @@ void HandleModifyOrDeleteFlight(Terminal terminal)
 //method to modify flight details
 void ModifyFlightDetails(Terminal terminal, Flight flight)
 {
-    Console.WriteLine("1. Modify Basic Information");
-    Console.WriteLine("2. Modify Status");
-    Console.WriteLine("3. Modify Special Request Code");
-    Console.WriteLine("4. Modify Boarding Gate");
-    Console.Write("Choose an option: ");
-    string? modifyOption = Console.ReadLine();
-    //check if modify option is empty
-    if (string.IsNullOrEmpty(modifyOption) || (modifyOption != "1" && modifyOption != "2" && modifyOption != "3" && modifyOption != "4"))
-    {
-        Console.WriteLine("Invalid option! Please choose option between 1-4.");
-        return;
-    }
-    //get airline object from flight object
-    Airline airline = terminal.GetAirlineFromFlight(flight);
     try
     {
+        string? modifyOption;
+        while (true)
+        {
+            Console.WriteLine("1. Modify Basic Information");
+            Console.WriteLine("2. Modify Status");
+            Console.WriteLine("3. Modify Special Request Code");
+            Console.WriteLine("4. Modify Boarding Gate");
+            Console.Write("Choose an option: ");
+            modifyOption = Console.ReadLine();
+            //check if modify option is empty
+            if (string.IsNullOrEmpty(modifyOption) || (modifyOption != "1" && modifyOption != "2" && modifyOption != "3" && modifyOption != "4"))
+            {
+                Console.WriteLine("Invalid option! Please choose option between 1-4.");
+                continue;
+            }
+            break;
+        }
+        //get airline object from flight object
+        Airline airline = terminal.GetAirlineFromFlight(flight);
         if (modifyOption == "1")
         {
             ModifyBasicInformation(flight);
@@ -690,6 +716,7 @@ void ModifyFlightDetails(Terminal terminal, Flight flight)
     {
         Console.WriteLine($"Unexpected error: {ex.Message}");
     }
+
 }
 //method to modify basic flight information
 void ModifyBasicInformation (Flight flight)
@@ -943,7 +970,7 @@ void DeleteFlight(Terminal terminal, Flight flight)
     }
 }
 
-//Feature 9
+//Feature 9 (Shawntrice)
 void DisplayFlightSchedule(Terminal terminal)
 {
     Console.WriteLine("=============================================");
@@ -985,7 +1012,7 @@ void DisplayFlightSchedule(Terminal terminal)
     }
 }
 
-//Advanced Feature (a)
+//Advanced Feature (a) (Shawntrice)
 void ProcessUnassignedFlights(Terminal terminal)
 {
     //initialize tracking variables
@@ -1106,7 +1133,7 @@ void ProcessUnassignedFlights(Terminal terminal)
     }
 }
 
-//Advanced Feature (b)
+//Advanced Feature (b) (Serene)
 bool ValidateFlightAssignments(Terminal terminal)
 {
     //iterate through airlines and flights to ensure all flights are assigned to boarding gates
@@ -1216,7 +1243,7 @@ while (true)
         }
         else if (option == "3")
         {
-            AssignBoardingGate(terminal);
+            AssignBoardingGate(terminal); //Feature 5
         }
         else if (option == "4")
         {
@@ -1247,6 +1274,7 @@ while (true)
             Console.WriteLine("Invalid option! Please try again.");
         }
     }
+    //error handling for invalid input
     catch (FormatException ex)
     {
         Console.WriteLine($"Error: {ex.Message}");
